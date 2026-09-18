@@ -1,0 +1,31 @@
+family	generation	subsystem	component	value	source
+Starlink	V2	structure	form_factor	compact flat-panel spacecraft	https://starlink.com/technology
+Starlink	V2	communications	optical_links	3 optical inter-satellite links up to 200 Gbps each	https://starlink.com/technology
+Starlink	V2	communications	user_antennas	5 Ku-band phased array antennas	https://starlink.com/technology
+Starlink	V2	communications	backhaul_antennas	3 dual-band Ka/E antennas	https://starlink.com/technology
+Starlink	V2	propulsion	thrusters	argon ion propulsion	https://starlink.com/technology
+Starlink	V2	power	solar_arrays	dual solar arrays	https://starlink.com/technology
+Starlink	V2	power	battery	high-capacity battery	https://starlink.com/technology
+Starlink	V2	guidance	star_tracker	custom-built star tracker	https://starlink.com/technology
+Starlink	V3	communications	optical_links	6 optical links at 400 Gbps each	https://starlink.com/updates/starlink-version-3-satellites
+Starlink	V3	communications	rf_backhaul	4 quad-band Ka/E/V/W antennas	https://starlink.com/updates/starlink-version-3-satellites
+Starlink	V3	communications	rf_capacity	up to 1.2 Tbps backhaul	https://starlink.com/updates/starlink-version-3-satellites
+Starlink	V3	power	solar_generation	approximately twice V2 array power	https://starlink.com/updates/starlink-version-3-satellites
+Starlink	V3	power	solar_blanket	four stitched 19 m segments per complete array	https://starlink.com/updates/starlink-version-3-satellites
+Webb	JWST	structure	observatory_mass	approximately 6200 kg	https://science.nasa.gov/mission/webb/fact-sheet/
+Webb	JWST	optics	primary_mirror	6.5 m; 18 gold-coated beryllium segments	https://science.nasa.gov/mission/webb/fact-sheet/
+Webb	JWST	thermal	sunshield	5 layers; 21.197 m x 14.162 m	https://science.nasa.gov/mission/webb/webbs-sunshield/
+Webb	JWST	instruments	science_payload	NIRCam; NIRSpec; MIRI; FGS/NIRISS	https://science.nasa.gov/mission/webb/fact-sheet/
+Hubble	HST	structure	length	13.2 m	https://science.nasa.gov/mission/hubble/overview/about-hubble/
+Hubble	HST	structure	mass	approximately 12200 kg post-SM4	https://science.nasa.gov/mission/hubble/overview/hubble-by-the-numbers/
+Hubble	HST	optics	primary_mirror	2.4 m	https://science.nasa.gov/mission/hubble/overview/about-hubble/
+Hubble	HST	guidance	actuators	4 reaction wheels; 4 magnetic torquer bars	https://science.nasa.gov/mission/hubble/overview/about-hubble/
+Voyager	V1V2	communications	high_gain_antenna	3.7 m diameter	https://science.nasa.gov/mission/voyager/frequently-asked-questions/
+Voyager	V1V2	power	generator	3 radioisotope thermoelectric generators	https://science.nasa.gov/mission/voyager/spacecraft/
+Voyager	V1V2	compute	command_computer_subsystem	command decoding; fault response; pointing; sequencing	https://science.nasa.gov/mission/voyager/spacecraft/
+Voyager	V1V2	guidance	AACS	three-axis stabilized attitude and articulation control	https://science.nasa.gov/mission/voyager/spacecraft/
+ISS	Current	structure	pressurized_module_length	67 m	https://www.nasa.gov/international-space-station/space-station-facts-and-figures/
+ISS	Current	structure	truss_length	94 m	https://www.nasa.gov/international-space-station/space-station-facts-and-figures/
+ISS	Current	structure	mass	approximately 419725 kg; varies	https://www.nasa.gov/international-space-station/space-station-facts-and-figures/
+ISS	Current	power	solar_arrays	8 main arrays; 75 to 90 kW	https://www.nasa.gov/international-space-station/space-station-facts-and-figures/
+ISS	Current	network	us_segment	44 computers; 100 data networks	https://www.nasa.gov/international-space-station/space-station-facts-and-figures/

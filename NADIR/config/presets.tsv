@@ -1,0 +1,9 @@
+id	sources	description
+core	iers.eop.rapid;usgs.earthquakes.hour;noaa.swpc.kp;noaa.swpc.solarwind.plasma;noaa.swpc.solarwind.mag;celestrak.active;celestrak.starlink;celestrak.stations	Minimal high-value live scientific baseline
+earth-live	usgs.earthquakes.hour;usgs.earthquakes.day;usgs.volcano.hans.recent;usgs.volcano.vona;nasa.eonet.open;noaa.swpc.kp;noaa.swpc.aurora;noaa.swpc.alerts;noaa.swpc.solarwind.plasma;noaa.swpc.solarwind.mag;noaa.swpc.dst;noaa.swpc.f107;ndbc.active.stations	Live Earth hazard ocean and geospace state
+orbit-live	celestrak.active;celestrak.starlink;celestrak.stations;celestrak.last30;celestrak.visual;celestrak.weather;celestrak.gnss;celestrak.gps;celestrak.glonass;celestrak.galileo;celestrak.beidou;celestrak.sbas;celestrak.science;celestrak.geo;celestrak.oneweb;celestrak.kuiper;uscg.gps.constellation	Operational orbital catalog baseline
+space-live	noaa.swpc.kp;noaa.swpc.aurora;noaa.swpc.alerts;noaa.swpc.solarwind.plasma;noaa.swpc.solarwind.mag;noaa.swpc.dst;noaa.swpc.f107;jpl.fireballs;nasa.cdaweb.hapi;nasa.omniweb	Heliophysics and near-Earth space state
+geodesy	iers.eop.rapid;nga.wgs84;nga.egm2008;noaa.wmm2025;noaa.wmm.coefficients;noaa.cors;igs.products	Earth reference frame gravity magnetism and GNSS baseline
+mapping	naturalearth.catalog;nasa.gibs.capabilities;nasa.cmr.collections;noaa.etopo2022;copernicus.dem;usgs.landsat.access;nasa.srtm	Global mapping terrain imagery and Earth observation discovery
+spacecraft	nasa.3d;nasa.ntrs.spacecraft;nasa.ntrs.propulsion;nasa.ntrs.remote.sensing;starlink.technology;starlink.v3;esa.space.debris.docs	Public spacecraft design and engineering references
+astronomy	nasa.exoplanets;nasa.heasarc;nasa.mast;nasa.cdaweb.hapi;nasa.omniweb	Public astronomy and heliophysics discovery services

@@ -1,0 +1,165 @@
+id	domain	format	interval_seconds	auth	syncable	authority	coverage	license	priority	url	description
+iers.eop.rapid	time	csv	21600	none	1	IERS	Earth orientation	provider-terms	100	https://datacenter.iers.org/products/eop/rapid/standard/csv/finals2000A.all.csv	Rapid EOP IAU 2000A including polar motion and UT1-UTC
+iers.bulletin.c72	time	html	15552000	none	1	IERS	Leap seconds	provider-terms	100	https://datacenter.iers.org/data/html/bulletinc-072.html	Bulletin C 72 UTC-TAI status published 2026-07-06
+iers.bulletins	time	html	86400	none	1	IERS	Time and Earth orientation	provider-terms	100	https://data.iers.org/bulletins.php	IERS Bulletin A B C D index
+nga.wgs84	earth	html	2592000	none	1	NGA	Geodesy	public-data	100	https://earth-info.nga.mil/?action=wgs84&dir=wgs84	World Geodetic System 1984 reference and products
+nga.egm2008	earth	html	2592000	none	1	NGA	Gravity and geoid	public-data	100	https://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/index.html	Earth Gravitational Model 2008 resources
+noaa.wmm2025	earth	html	2592000	none	1	NOAA NCEI	Geomagnetism	public-data	100	https://www.ncei.noaa.gov/products/world-magnetic-model	World Magnetic Model 2025
+noaa.wmm.coefficients	earth	html	2592000	none	1	NOAA NCEI	Geomagnetism	public-data	100	https://www.ncei.noaa.gov/products/world-magnetic-model/wmm-coefficients	WMM2025 coefficient distribution and test values
+noaa.cors	earth	html	86400	none	1	NOAA NGS	GNSS reference stations	public-data	100	https://www.ngs.noaa.gov/CORS/	NOAA Continuously Operating Reference Station network
+noaa.cors.data	earth	html	86400	none	1	NOAA NGS	GNSS observations and navigation	public-data	100	https://www.ngs.noaa.gov/CORS/data.shtml	CORS observations meteorology navigation ephemerides and station metadata
+igs.products	earth	html	86400	none	1	International GNSS Service	Precise GNSS products	open-data	95	https://igs.org/products/	Precise GNSS orbits clocks Earth rotation and station products
+naturalearth.catalog	earth	html	2592000	none	1	Natural Earth	Global cartography	public-domain	90	https://www.naturalearthdata.com/downloads/	Global vector and raster cartographic datasets
+osm.replication.minute	earth	txt	60	none	1	OpenStreetMap	Global map change stream	ODbL-1.0	90	https://planet.openstreetmap.org/replication/minute/state.txt	OpenStreetMap minutely replication sequence state
+osm.planet	earth	pbf	604800	none	0	OpenStreetMap	Global map database	ODbL-1.0	90	https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf	Global OSM planet file
+nasa.gibs.capabilities	earth	xml	86400	none	1	NASA EOSDIS	Earth imagery	provider-terms	100	https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/1.0.0/WMTSCapabilities.xml	NASA GIBS global imagery WMTS capabilities
+nasa.cmr.collections	earth	json	86400	none	1	NASA EOSDIS	Earth science catalog	provider-terms	100	https://cmr.earthdata.nasa.gov/search/collections.json?page_size=100	NASA CMR Earth science collection search
+nasa.cmr.granules	earth	json	0	none	0	NASA EOSDIS	Earth science granules	provider-terms	100	https://cmr.earthdata.nasa.gov/search/granules.json	NASA CMR granule query endpoint
+noaa.etopo2022	earth	html	2592000	none	1	NOAA NCEI	Topography and bathymetry	public-data	100	https://www.ncei.noaa.gov/products/etopo-global-relief-model	ETOPO 2022 global relief model
+copernicus.dem	earth	html	2592000	account	0	Copernicus Data Space	Elevation	provider-terms	95	https://documentation.dataspace.copernicus.eu/Data/Others/CCM.html	Copernicus DEM GLO-30 and GLO-90
+usgs.landsat.access	earth	html	604800	varies	0	USGS	Earth observation imagery	public-data	100	https://www.usgs.gov/landsat-missions/landsat-data-access	Landsat public data access routes
+nasa.srtm	earth	html	2592000	earthdata	0	NASA EOSDIS	Elevation	provider-terms	100	https://www.earthdata.nasa.gov/data/instruments/srtm	Shuttle Radar Topography Mission datasets
+usgs.earthquakes.hour	earth	geojson	60	none	1	USGS	Seismic hazards	public-data	100	https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson	Global earthquakes from the last hour
+usgs.earthquakes.day	earth	geojson	300	none	1	USGS	Seismic hazards	public-data	100	https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson	Global earthquakes from the last day
+usgs.earthquakes.week	earth	geojson	900	none	1	USGS	Seismic hazards	public-data	100	https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson	Global earthquakes from the last week
+usgs.earthquake.catalog	earth	json	0	none	0	USGS	Seismic catalog	public-data	100	https://earthquake.usgs.gov/fdsnws/event/1/query	USGS FDSN earthquake catalog query API
+nasa.eonet.open	earth	json	300	none	1	NASA GSFC	Natural hazards	provider-terms	100	https://eonet.gsfc.nasa.gov/api/v3/events?status=open	NASA EONET open natural events
+nasa.firms.area	earth	csv	600	map_key	0	NASA LANCE FIRMS	Wildfire hotspots	map-key-terms	100	https://firms.modaps.eosdis.nasa.gov/api/area/csv/{MAP_KEY}/{SOURCE}/{AREA}/{DAYS}	FIRMS MODIS VIIRS Landsat active fire area API
+nasa.firms.availability	earth	csv	600	map_key	0	NASA LANCE FIRMS	Wildfire source availability	map-key-terms	100	https://firms.modaps.eosdis.nasa.gov/api/data_availability/csv/{MAP_KEY}/ALL	FIRMS sensor data availability
+noaa.gfs.0p25	earth	grib2	21600	none	0	NOAA NCEP	Global weather model	public-data	100	https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl	GFS 0.25 degree weather model query service
+noaa.gefs.0p25	earth	grib2	21600	none	0	NOAA NCEP	Global ensemble weather	public-data	100	https://nomads.ncep.noaa.gov/gribfilter.php?ds=gefs_atmos_0p25s	GEFS 0.25 degree ensemble query service
+nws.alerts.active	earth	json	30	none	1	NOAA NWS	Weather alerts	public-data	100	https://api.weather.gov/alerts/active	Active NWS CAP alerts in JSON-LD
+nws.api	earth	json	0	none	0	NOAA NWS	Forecasts and observations	public-data	100	https://api.weather.gov	NWS linked-data API root
+ndbc.active.stations	earth	xml	3600	none	1	NOAA NDBC	Ocean and weather stations	public-data	100	https://www.ndbc.noaa.gov/activestations.xml	Active NOAA buoy and station inventory
+ndbc.realtime.index	earth	html	300	none	1	NOAA NDBC	Ocean and weather observations	public-data	100	https://www.ndbc.noaa.gov/data/realtime2/	Near real-time meteorological ocean wave and radiation files
+noaa.coops.api	earth	json	0	none	0	NOAA CO-OPS	Tides currents water levels	public-data	100	https://api.tidesandcurrents.noaa.gov/api/prod/datagetter	CO-OPS station observations and predictions API
+noaa.coops.metadata	earth	json	0	none	0	NOAA CO-OPS	Coastal station metadata	public-data	100	https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json	CO-OPS station metadata endpoint
+usgs.water	earth	json	0	optional_key	0	USGS	Hydrology	public-data	100	https://api.waterdata.usgs.gov	USGS modern water data APIs
+aviationweather.metars	earth	xml.gz	60	none	1	NOAA Aviation Weather Center	Global aviation observations	public-data	100	https://aviationweather.gov/data/cache/metars.cache.xml.gz	All current METAR observations cache
+aviationweather.tafs	earth	xml.gz	600	none	1	NOAA Aviation Weather Center	Global aviation forecasts	public-data	100	https://aviationweather.gov/data/cache/tafs.cache.xml.gz	All current TAF forecasts cache
+aviationweather.stations	earth	json.gz	86400	none	1	NOAA Aviation Weather Center	Aviation stations	public-data	100	https://aviationweather.gov/data/cache/stations.cache.json.gz	Global aviation station inventory
+nhc.gis	earth	html	300	none	1	NOAA NHC	Tropical cyclones	public-data	100	https://www.nhc.noaa.gov/gis/	Official hurricane track cone warning and wind GIS products
+noaa.swpc.kp	earth	json	60	none	1	NOAA SWPC	Geomagnetic activity	public-data	100	https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json	Planetary K index
+noaa.swpc.aurora	earth	json	300	none	1	NOAA SWPC	Aurora	public-data	100	https://services.swpc.noaa.gov/json/ovation_aurora_latest.json	OVATION auroral probability model
+noaa.swpc.alerts	earth	json	60	none	1	NOAA SWPC	Space weather alerts	public-data	100	https://services.swpc.noaa.gov/products/alerts.json	Space weather watches warnings and alerts
+noaa.swpc.solarwind.plasma	earth	json	60	none	1	NOAA SWPC	Solar wind	public-data	100	https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json	Real-time solar wind plasma
+noaa.swpc.solarwind.mag	earth	json	60	none	1	NOAA SWPC	Interplanetary magnetic field	public-data	100	https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json	Real-time solar wind magnetic field
+noaa.swpc.dst	earth	json	300	none	1	NOAA SWPC	Geomagnetic storms	public-data	100	https://services.swpc.noaa.gov/products/kyoto-dst.json	Kyoto Dst geomagnetic index mirrored by SWPC
+noaa.swpc.f107	earth	json	3600	none	1	NOAA SWPC	Solar radio flux	public-data	100	https://services.swpc.noaa.gov/products/10cm-flux-30-day.json	10.7 cm solar radio flux history
+noaa.swpc.scales	earth	json	60	none	1	NOAA SWPC	Space weather scales	public-data	100	https://services.swpc.noaa.gov/products/noaa-scales.json	Current NOAA space weather scale state
+epa.airnow	earth	json	0	api_key	0	EPA AirNow	Air quality	provider-terms	95	https://www.airnowapi.org/	AirNow observations forecasts and air quality products
+nasa.power	earth	json	0	none	0	NASA POWER	Meteorology and solar energy	provider-terms	95	https://power.larc.nasa.gov/docs/services/api/	NASA POWER analysis-ready meteorology and solar API
+jpl.fireballs	space	json	600	none	1	NASA JPL CNEOS	Atmospheric impact events	provider-terms	100	https://ssd-api.jpl.nasa.gov/fireball.api?limit=100&req-alt=true&vel-comp=true	Fireballs detected and reported by US Government sensors
+celestrak.active	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=ACTIVE&FORMAT=JSON	Active satellites OMM JSON GP elements
+celestrak.starlink	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=STARLINK&FORMAT=JSON	Starlink constellation OMM JSON GP elements
+celestrak.stations	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=STATIONS&FORMAT=JSON	Crewed stations and related spacecraft OMM JSON GP elements
+celestrak.last30	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=LAST-30-DAYS&FORMAT=JSON	Objects launched in last 30 days OMM JSON GP elements
+celestrak.visual	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=VISUAL&FORMAT=JSON	Bright visual satellites OMM JSON GP elements
+celestrak.weather	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=WEATHER&FORMAT=JSON	Weather satellites OMM JSON GP elements
+celestrak.resource	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=RESOURCE&FORMAT=JSON	Earth resource satellites OMM JSON GP elements
+celestrak.sar	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=SAR&FORMAT=JSON	Synthetic aperture radar satellites OMM JSON GP elements
+celestrak.sarsat	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=SARSAT&FORMAT=JSON	Search and rescue satellites OMM JSON GP elements
+celestrak.tdrss	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=TDRSS&FORMAT=JSON	Tracking and Data Relay Satellite System OMM JSON GP elements
+celestrak.argos	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=ARGOS&FORMAT=JSON	ARGOS data collection satellites OMM JSON GP elements
+celestrak.planet	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=PLANET&FORMAT=JSON	Planet satellites OMM JSON GP elements
+celestrak.spire	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=SPIRE&FORMAT=JSON	Spire satellites OMM JSON GP elements
+celestrak.geo	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=GEO&FORMAT=JSON	Active geosynchronous satellites OMM JSON GP elements
+celestrak.intelsat	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=INTELSAT&FORMAT=JSON	Intelsat satellites OMM JSON GP elements
+celestrak.ses	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=SES&FORMAT=JSON	SES satellites OMM JSON GP elements
+celestrak.eutelsat	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=EUTELSAT&FORMAT=JSON	Eutelsat satellites OMM JSON GP elements
+celestrak.telesat	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=TELESAT&FORMAT=JSON	Telesat satellites OMM JSON GP elements
+celestrak.oneweb	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=ONEWEB&FORMAT=JSON	OneWeb constellation OMM JSON GP elements
+celestrak.kuiper	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=KUIPER&FORMAT=JSON	Project Kuiper constellation OMM JSON GP elements
+celestrak.iridium.next	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=IRIDIUM-NEXT&FORMAT=JSON	Iridium NEXT satellites OMM JSON GP elements
+celestrak.orbcomm	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=ORBCOMM&FORMAT=JSON	Orbcomm satellites OMM JSON GP elements
+celestrak.globalstar	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=GLOBALSTAR&FORMAT=JSON	Globalstar satellites OMM JSON GP elements
+celestrak.amateur	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=AMATEUR&FORMAT=JSON	Amateur radio satellites OMM JSON GP elements
+celestrak.satnogs	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=SATNOGS&FORMAT=JSON	SatNOGS-interest satellites OMM JSON GP elements
+celestrak.gnss	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=GNSS&FORMAT=JSON	GNSS satellites OMM JSON GP elements
+celestrak.gps	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=GPS-OPS&FORMAT=JSON	Operational GPS OMM JSON GP elements
+celestrak.glonass	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=GLO-OPS&FORMAT=JSON	Operational GLONASS OMM JSON GP elements
+celestrak.galileo	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=GALILEO&FORMAT=JSON	Galileo navigation satellites OMM JSON GP elements
+celestrak.beidou	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=BEIDOU&FORMAT=JSON	BeiDou navigation satellites OMM JSON GP elements
+celestrak.sbas	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=SBAS&FORMAT=JSON	Satellite based augmentation systems OMM JSON GP elements
+celestrak.science	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=SCIENCE&FORMAT=JSON	Space and Earth science satellites OMM JSON GP elements
+celestrak.geodetic	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=GEODETIC&FORMAT=JSON	Geodetic satellites OMM JSON GP elements
+celestrak.engineering	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=ENGINEERING&FORMAT=JSON	Engineering satellites OMM JSON GP elements
+celestrak.education	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=EDUCATION&FORMAT=JSON	Education satellites OMM JSON GP elements
+celestrak.military	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=MILITARY&FORMAT=JSON	Military satellites OMM JSON GP elements
+celestrak.radar	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=RADAR&FORMAT=JSON	Radar calibration satellites OMM JSON GP elements
+celestrak.cubesat	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=CUBESAT&FORMAT=JSON	CubeSats OMM JSON GP elements
+celestrak.fengyun.debris	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=FENGYUN-1C&FORMAT=JSON	Fengyun 1C ASAT debris OMM JSON GP elements
+celestrak.iridium33.debris	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=IRIDIUM-33-DEBRIS&FORMAT=JSON	Iridium 33 collision debris OMM JSON GP elements
+celestrak.cosmos2251.debris	orbit	json	7200	none	1	CelesTrak	Earth orbit	provider-terms	95	https://celestrak.org/NORAD/elements/gp.php?GROUP=COSMOS-2251-DEBRIS&FORMAT=JSON	Cosmos 2251 collision debris OMM JSON GP elements
+celestrak.supgp.starlink	orbit	html	7200	none	0	CelesTrak	Operator-derived Starlink ephemerides	provider-terms	97	https://celestrak.org/NORAD/elements/supplemental/	Supplemental GP data derived from SpaceX public ephemerides
+celestrak.groups	orbit	html	7200	none	1	CelesTrak	Orbital catalog groups	provider-terms	95	https://celestrak.org/NORAD/elements/index.php?FORMAT=json	CelesTrak current GP group catalog
+spacetrack.gp	orbit	json	7200	account	0	USSF 18 SDS Space-Track	Earth orbit catalog	account-terms	100	https://www.space-track.org/basicspacedata/query/class/gp/format/json	Official Space-Track GP catalog account endpoint
+spacetrack.satcat	orbit	json	86400	account	0	USSF 18 SDS Space-Track	Satellite catalog metadata	account-terms	100	https://www.space-track.org/basicspacedata/query/class/satcat/format/json	Official Space-Track SATCAT metadata
+spacetrack.cdm	orbit	json	0	account	0	USSF 18 SDS Space-Track	Conjunction data messages	account-terms	100	https://www.space-track.org/basicspacedata/query/class/cdm_public/format/json	Public conjunction data messages subject to account terms
+jpl.horizons	space	json	0	none	0	NASA JPL SSD	Solar system ephemerides	provider-terms	100	https://ssd.jpl.nasa.gov/api/horizons.api	Horizons planets moons spacecraft asteroids and comets
+jpl.horizons.lookup	space	json	0	none	0	NASA JPL SSD	Solar system object lookup	provider-terms	100	https://ssd.jpl.nasa.gov/api/horizons_lookup.api	Horizons object lookup API
+jpl.sbdb	space	json	0	none	0	NASA JPL SSD	Asteroids and comets	provider-terms	100	https://ssd-api.jpl.nasa.gov/sbdb.api	Small-Body Database object query
+jpl.sbdb.query	space	json	86400	none	1	NASA JPL SSD	Small-body catalog	provider-terms	100	https://ssd-api.jpl.nasa.gov/sbdb_query.api?info=count	Current Small-Body Database count and schema information
+jpl.closeapproach	space	json	0	none	0	NASA JPL CNEOS	Small-body close approaches	provider-terms	100	https://ssd-api.jpl.nasa.gov/cad.api	Asteroid and comet close approach query API
+jpl.sentry	space	json	3600	none	1	NASA JPL CNEOS	Impact risk	provider-terms	100	https://ssd-api.jpl.nasa.gov/sentry.api	Sentry Earth impact risk assessment summary
+jpl.scout	space	json	900	none	1	NASA JPL CNEOS	New NEO candidates	provider-terms	100	https://ssd-api.jpl.nasa.gov/scout.api	Scout NEOCP orbit and impact assessment
+jpl.nhats	space	json	86400	none	1	NASA JPL CNEOS	Accessible NEO trajectories	provider-terms	100	https://ssd-api.jpl.nasa.gov/nhats.api	Human-accessible Near-Earth Object trajectory catalog
+jpl.sb.satellites	space	json	86400	none	1	NASA JPL SSD	Moons of asteroids and comets	provider-terms	100	https://ssd-api.jpl.nasa.gov/sb_sat.api?orb=1&phys-par=1&fullname=1&class=1	Small-body satellites with available orbits and physical parameters
+jpl.sb.radar	space	json	86400	none	1	NASA JPL SSD	Radar astrometry	provider-terms	100	https://ssd-api.jpl.nasa.gov/sb_radar.api	Small-body radar astrometry records
+jpl.missiondesign	space	json	0	none	0	NASA JPL SSD	Mission design	provider-terms	100	https://ssd-api.jpl.nasa.gov/mdesign.api	Small-body mission design query API
+jpl.planet.physical	space	html	2592000	none	1	NASA JPL SSD	Planet physical parameters	provider-terms	100	https://ssd.jpl.nasa.gov/planets/phys_par.html	Planetary physical parameters
+jpl.satellite.physical	space	html	2592000	none	1	NASA JPL SSD	Natural satellite physical parameters	provider-terms	100	https://ssd.jpl.nasa.gov/sats/phys_par/	Natural satellite physical parameters
+nasa.exoplanets	space	csv	86400	none	1	NASA Exoplanet Archive	Exoplanets	provider-terms	100	https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+pscomppars&format=csv	Composite parameters for confirmed exoplanets
+mpc.observations	space	xml	0	none	0	Minor Planet Center	Small-body observations	provider-terms	95	https://data.minorplanetcenter.net/api/get-obs	Minor Planet Center observations query API
+nasa.pds	space	html	86400	none	1	NASA PDS	Planetary science archive	provider-terms	100	https://pds.nasa.gov/	Planetary Data System archive portal
+naif.generic	space	html	86400	none	1	NASA JPL NAIF	SPICE kernels	provider-terms	100	https://naif.jpl.nasa.gov/pub/naif/generic_kernels/	Generic SPICE kernels for solar system geometry
+naif.missions	space	html	86400	none	1	NASA JPL NAIF	Mission SPICE kernels	provider-terms	100	https://naif.jpl.nasa.gov/pub/naif/	Mission and generic NAIF kernel archive
+usgs.astrogeology	space	html	604800	none	1	USGS Astrogeology	Planetary cartography	public-data	100	https://astrogeology.usgs.gov/	Planetary maps geodesy cartography and data
+nasa.dsn.now	space	html	5	none	1	NASA JPL	Deep Space Network live state	provider-terms	100	https://eyes.nasa.gov/apps/dsn-now/dsn.html	Current DSN antenna to spacecraft communication state
+nasa.3d	structure	html	604800	none	1	NASA	3D spacecraft models	provider-terms	100	https://www.nasa.gov/3d-resources/	Public NASA spacecraft hardware rover and telescope 3D resources
+nasa.ntrs.spacecraft	structure	html	86400	none	1	NASA STI	Spacecraft engineering	provider-terms	100	https://ntrs.nasa.gov/search?subjectCategory=Spacecraft%20Design%2C%20Testing%20and%20Performance	Public NASA spacecraft design testing and performance reports
+nasa.ntrs.propulsion	structure	html	86400	none	1	NASA STI	Propulsion and power	provider-terms	100	https://ntrs.nasa.gov/search?subjectCategory=Spacecraft%20Propulsion%20and%20Power	Public NASA spacecraft propulsion and power reports
+nasa.ntrs.remote.sensing	structure	html	86400	none	1	NASA STI	Earth observation instruments	provider-terms	100	https://ntrs.nasa.gov/search?subjectCategory=Earth%20Resources%20and%20Remote%20Sensing	Public NASA Earth resources and remote sensing reports
+starlink.technology	structure	html	604800	none	1	SpaceX Starlink	Starlink spacecraft technology	provider-terms	90	https://starlink.com/technology	Official Starlink technology publication
+starlink.v3	structure	html	604800	none	1	SpaceX Starlink	Starlink V3 architecture	provider-terms	90	https://starlink.com/updates/starlink-version-3-satellites	Official Starlink V3 spacecraft technology publication
+fcc.starlink.gen2	structure	pdf	2592000	none	0	FCC	Starlink authorization and shells	public-record	100	https://docs.fcc.gov/public/attachments/DA-26-36A1.pdf	FCC public authorization document containing Gen2 orbital information
+fcc.ecfs	structure	html	0	none	0	FCC	Satellite regulatory filings	public-record	100	https://www.fcc.gov/ecfs/	FCC Electronic Comment Filing System public records
+itu.spaceexplorer	structure	html	0	none	0	ITU	Satellite network filings	provider-terms	95	https://www.itu.int/itu-r/go/spaceexplorer	ITU satellite network filing exploration
+ripe.ris.live	network	websocket	0	none	0	RIPE NCC	Global BGP	provider-terms	95	wss://ris-live.ripe.net/v1/ws/	Real-time BGP messages from RIPE RIS collectors
+routeviews	network	html	900	none	1	Route Views	Global BGP	provider-terms	90	https://www.routeviews.org/	Public BGP route collector project
+rpki.routinator	network	https	0	local	0	NLnet Labs	RPKI validation	open-source	85	https://routinator.docs.nlnetlabs.nl/	Local RPKI route origin validation integration target
+nist.internet.time	time	html	86400	none	1	NIST	UTC time dissemination	public-data	100	https://www.nist.gov/pml/time-and-frequency-division/time-distribution/internet-time-service-its	NIST Internet Time Service and UTC dissemination reference
+usgs.geomag.api	earth	json	60	query	0	USGS	Geomagnetic observatories	public-domain	100	https://geomag.usgs.gov/ws/data/?id=BOU&format=json	USGS geomagnetic observatory web service supporting one-second and one-minute measurements
+usgs.volcano.hans.recent	earth	json	300	none	1	USGS Volcano Hazards Program	Volcano notices	public-domain	100	https://volcanoes.usgs.gov/hans-public/api/notice/getRecentNotices	Recent HANS volcano hazard notices
+usgs.volcano.vona	earth	json	300	none	1	USGS Volcano Hazards Program	Volcanic activity notices for aviation	public-domain	100	https://volcanoes.usgs.gov/vsc/api/hansApi/vonas/7	Recent VONA notices for aviation
+usgs.volcano.hans.api	earth	json	300	query	0	USGS Volcano Hazards Program	Volcano hazard search	public-domain	100	https://volcanoes.usgs.gov/hans-public/api/	HANS public API for notices volcano metadata and search
+usgs.water.instantaneous	earth	json	900	query	0	USGS	Hydrology near-real-time	public-domain	95	https://waterservices.usgs.gov/nwis/iv/?format=json	Near-real-time streamflow gage height and hydrologic time series
+usgs.water.nextgen	earth	json	900	query	0	USGS	Hydrology next-generation API	public-domain	100	https://api.waterdata.usgs.gov/	Next-generation USGS water data API migration target
+noaa.erddap.ncei	earth	json	3600	none	1	NOAA NCEI	Oceanographic and environmental datasets	public-data	95	https://www.ncei.noaa.gov/erddap/tabledap/allDatasets.json	NOAA NCEI ERDDAP dataset catalog
+noaa.erddap.pmel	earth	json	3600	none	1	NOAA PMEL	Ocean climate and buoy datasets	public-data	95	https://data.pmel.noaa.gov/generic/erddap/tabledap/allDatasets.json	NOAA PMEL ERDDAP dataset catalog
+noaa.erddap.osmc	earth	json	3600	none	1	NOAA GOMO OSMC	Global ocean observing data	public-data	95	https://osmc.noaa.gov/erddap/tabledap/allDatasets.json	OSMC ERDDAP catalog including Argo drifters GO-SHIP and animal-borne sensors
+noaa.erddap.coops	earth	json	3600	none	1	NOAA CO-OPS	Coastal oceanographic datasets	public-data	95	https://opendap.co-ops.nos.noaa.gov/erddap/tabledap/allDatasets.json	CO-OPS ERDDAP coastal observations catalog
+uscg.gps.constellation	orbit	html	900	none	1	USCG Navigation Center	GPS operational constellation	public-data	100	https://www.navcen.uscg.gov/gps-constellation	Official GPS constellation status SVN PRN block type clock and outage details
+uscg.gps.almanacs	orbit	html	3600	none	1	USCG Navigation Center	GPS NANU almanac operations advisories	public-data	100	https://www.navcen.uscg.gov/gps-nanus-almanacs-opsadvisories-sof	Official GPS NANUs YUMA SEM almanacs operational advisories and outage files
+uscg.gps.archives	orbit	html	86400	query	0	USCG Navigation Center	GPS programmatic archives	public-data	100	https://www.navcen.uscg.gov/sites/default/files/pdf/gps/Programmatically_Accessing_Archives.pdf	Programmatic archive pattern for GPS NANU YUMA SEM and operations advisory files
+nasa.donki.cme	space	json	900	api_key	0	NASA CCMC	Coronal mass ejections	public-data	100	https://api.nasa.gov/DONKI/CME	DONKI coronal mass ejection event API
+nasa.donki.cme.analysis	space	json	900	api_key	0	NASA CCMC	Coronal mass ejection analyses	public-data	100	https://api.nasa.gov/DONKI/CMEAnalysis	DONKI CME analysis API including speed and geometry
+nasa.donki.gst	space	json	900	api_key	0	NASA CCMC	Geomagnetic storms	public-data	100	https://api.nasa.gov/DONKI/GST	DONKI geomagnetic storm event API
+nasa.donki.ips	space	json	900	api_key	0	NASA CCMC	Interplanetary shocks	public-data	100	https://api.nasa.gov/DONKI/IPS	DONKI interplanetary shock event API
+nasa.donki.flr	space	json	900	api_key	0	NASA CCMC	Solar flares	public-data	100	https://api.nasa.gov/DONKI/FLR	DONKI solar flare event API
+nasa.donki.sep	space	json	900	api_key	0	NASA CCMC	Solar energetic particle events	public-data	100	https://api.nasa.gov/DONKI/SEP	DONKI solar energetic particle event API
+nasa.donki.hss	space	json	900	api_key	0	NASA CCMC	High speed solar wind streams	public-data	100	https://api.nasa.gov/DONKI/HSS	DONKI high speed stream event API
+nasa.donki.notifications	space	json	900	api_key	0	NASA CCMC	Space weather notifications	public-data	100	https://api.nasa.gov/DONKI/notifications	DONKI space weather notification API
+nasa.donki.enlil	space	json	3600	api_key	0	NASA CCMC	WSA-Enlil heliospheric simulations	public-data	100	https://api.nasa.gov/DONKI/WSAEnlilSimulations	DONKI WSA-Enlil simulation results
+nasa.cdaweb.hapi	space	json	3600	none	1	NASA GSFC SPDF	Heliophysics datasets	public-data	100	https://cdaweb.gsfc.nasa.gov/hapi/catalog	HAPI catalog for public heliophysics data in CDAWeb
+nasa.cdaweb.cdas	space	json	3600	query	0	NASA GSFC SPDF	Heliophysics data and metadata	public-data	100	https://cdaweb.gsfc.nasa.gov/WebServices/REST/	CDAS REST web service for public heliophysics datasets and metadata
+nasa.omniweb	space	html	3600	none	1	NASA GSFC SPDF	Heliospheric plasma magnetic field and trajectories	public-data	95	https://omniweb.gsfc.nasa.gov/	OMNIWeb heliospheric magnetic plasma energetic particle and trajectory data
+nasa.heasarc	space	html	86400	none	1	NASA GSFC HEASARC	High-energy astrophysics catalogs and missions	public-data	95	https://heasarc.gsfc.nasa.gov/	NASA high-energy astrophysics archive
+nasa.heasarc.api	space	tap	86400	query	0	NASA GSFC HEASARC	Astronomy catalogs images spectra	public-data	100	https://heasarc.gsfc.nasa.gov/docs/archive/apis.html	HEASARC TAP VO Cone SIA SSA and XAMIN API access
+nasa.mast	space	html	86400	none	1	NASA STScI MAST	Optical ultraviolet near-infrared astronomy	public-data	95	https://archive.stsci.edu/mast.html	Mikulski Archive for Space Telescopes mission and catalog data
+esa.gaia.tap	space	tap	86400	query	0	ESA	Milky Way astrometry and stellar catalog	public-data	100	https://gea.esac.esa.int/tap-server/tap	Gaia Archive TAP service for astrometry photometry proper motions and radial velocities
+esa.discos	structure	api	86400	account	0	ESA Space Debris Office	Unclassified space objects launch and physical properties	provider-terms	100	https://discosweb.esoc.esa.int/	DISCOS spacecraft launch vehicle mission mass size shape and registration data
+esa.swarm.products	earth	html	86400	none	1	ESA	Earth magnetic field and upper atmosphere	public-data	95	https://www.esa.int/Applications/Observing_the_Earth/FutureEO/Swarm/Data_products	Swarm Level 0 Level 1 and Level 2 magnetic and upper-atmosphere data products
+esa.space.debris.docs	structure	html	604800	none	1	ESA Space Debris Office	Space debris engineering standards and guidance	public-data	90	https://sdup.esoc.esa.int/documents/	Public ESA space debris mitigation reentry safety and design-for-demise documents
+eso.tap.observations	space	tap	86400	query	0	ESO	Astronomical observations	public-data	90	https://archive.eso.org/tap_obs	ESO observation archive TAP endpoint
+eso.tap.catalogs	space	tap	86400	query	0	ESO	Astronomical catalogs	public-data	90	https://archive.eso.org/tap_cat	ESO catalog TAP endpoint

@@ -1,0 +1,12 @@
+source=usgs.earthquakes.hour
+domain=earth
+format=geojson
+authority=USGS
+coverage=Seismic hazards
+license=public-data
+fetched=2026-09-18T12:33:17.888325600Z
+fetched_unix_ns=1789734797888325600
+http_status=200
+bytes=4536
+sha256=3f1ecf9581249996b9138333eded89f84b85ecf05320ca17ad89bd143c609048
+url=https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson

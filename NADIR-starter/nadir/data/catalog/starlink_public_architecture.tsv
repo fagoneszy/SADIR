@@ -1,0 +1,14 @@
+family	generation	subsystem	component	value	source
+Starlink	V2	structure	form_factor	compact flat-panel spacecraft	https://starlink.com/technology
+Starlink	V2	communications	optical_links	3 optical inter-satellite links up to 200 Gbps each	https://starlink.com/technology
+Starlink	V2	communications	user_antennas	5 Ku-band phased array antennas	https://starlink.com/technology
+Starlink	V2	communications	backhaul_antennas	3 dual-band Ka/E antennas	https://starlink.com/technology
+Starlink	V2	propulsion	thrusters	argon ion propulsion	https://starlink.com/technology
+Starlink	V2	power	solar_arrays	dual solar arrays	https://starlink.com/technology
+Starlink	V2	power	battery	high-capacity battery	https://starlink.com/technology
+Starlink	V2	guidance	star_tracker	custom-built star tracker	https://starlink.com/technology
+Starlink	V3	communications	optical_links	6 optical links at 400 Gbps each	https://starlink.com/updates/starlink-version-3-satellites
+Starlink	V3	communications	rf_backhaul	4 quad-band Ka/E/V/W antennas	https://starlink.com/updates/starlink-version-3-satellites
+Starlink	V3	communications	rf_capacity	up to 1.2 Tbps backhaul	https://starlink.com/updates/starlink-version-3-satellites
+Starlink	V3	power	solar_generation	approximately twice V2 array power	https://starlink.com/updates/starlink-version-3-satellites
+Starlink	V3	power	solar_blanket	four stitched 19 m segments per complete array	https://starlink.com/updates/starlink-version-3-satellites
