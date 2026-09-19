@@ -12,6 +12,11 @@ add_library(nadir_core
     src/core/sha256.cpp
     src/core/json.cpp
     src/core/time_controller.cpp
+    src/time/instant.cpp
+    src/time/utc.cpp
+    src/time/leap_seconds.cpp
+    src/time/julian_date.cpp
+    src/time/time_context.cpp
     src/data/source.cpp
     src/data/preset.cpp
     src/data/http.cpp
@@ -75,6 +80,10 @@ if(BUILD_TESTING)
     add_executable(nadir_units_tests tests/test_units.cpp)
     target_link_libraries(nadir_units_tests PRIVATE nadir_units)
     add_test(NAME nadir_units_tests COMMAND nadir_units_tests)
+
+    add_executable(nadir_time_tests tests/test_time.cpp)
+    target_link_libraries(nadir_time_tests PRIVATE nadir_core)
+    add_test(NAME nadir_time_tests COMMAND nadir_time_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
