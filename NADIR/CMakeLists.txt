@@ -31,6 +31,9 @@ add_library(nadir_core
     src/render/camera.cpp
     src/render/projection.cpp
     src/render/scene.cpp
+    src/render/phosphor_buffer.cpp
+    src/render/presenter.cpp
+    src/render/earth_mesh.cpp
     src/satellite/tle.cpp
     src/spacecraft/architecture.cpp
     src/model/obj.cpp
@@ -61,4 +64,19 @@ if(BUILD_TESTING)
     add_executable(nadir_tests tests/test_main.cpp)
     target_link_libraries(nadir_tests PRIVATE nadir_core)
     add_test(NAME nadir_tests COMMAND nadir_tests)
+
+    add_executable(nadir_render_tests tests/test_render.cpp)
+    target_link_libraries(nadir_render_tests PRIVATE nadir_core)
+    add_test(NAME nadir_render_tests COMMAND nadir_render_tests)
+
+    add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
+    target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
+    add_test(NAME nadir_sgp4_verification COMMAND nadir_sgp4_verification)
+    set_tests_properties(nadir_sgp4_verification PROPERTIES LABELS science)
+
+    add_custom_target(science-gate
+        COMMAND ${CMAKE_CTEST_COMMAND} -R nadir_sgp4_verification --output-on-failure
+        DEPENDS nadir_sgp4_verification
+        COMMENT "Running science gate (SGP4 Vallado verification)"
+    )
 endif()

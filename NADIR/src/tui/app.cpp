@@ -138,6 +138,10 @@ int App::command(const std::vector<std::string>& args) {
 }
 
 int App::earth(const std::vector<std::string>& args) {
+    if (args.size() >= 2 && args[1] == "live") {
+        return earth_live(args);
+    }
+
     render::EarthView view{};
     for (std::size_t i=1;i+1<args.size();++i) {
         if (args[i]=="--yaw") view.yaw_deg=std::stod(args[++i]);
@@ -153,6 +157,12 @@ int App::earth(const std::vector<std::string>& args) {
     std::cout<<"\x1b[38;2;0;255;119mEARTH REFERENCE / WGS84\x1b[0m\n";
     std::cout<<"LAT "<<std::fixed<<std::setprecision(6)<<view.observer_lat_deg<<"  LON "<<view.observer_lon_deg<<"\n";
     std::cout<<fb.braille();
+    return 0;
+}
+
+int App::earth_live(const std::vector<std::string>&) {
+    std::cout<<"earth live: realtime VT mode not yet wired in this commit (DEMO)\n";
+    std::cout<<"This stub exists to keep the build green while the render pipeline is finished.\n";
     return 0;
 }
 

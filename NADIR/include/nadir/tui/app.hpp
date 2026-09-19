@@ -12,6 +12,7 @@ private:
     int shell();
     int command(const std::vector<std::string>& args);
     int earth(const std::vector<std::string>& args);
+    int earth_live(const std::vector<std::string>& args);
     int geo(const std::vector<std::string>& args);
     int tle(const std::vector<std::string>& args);
     int sources(const std::vector<std::string>& args);

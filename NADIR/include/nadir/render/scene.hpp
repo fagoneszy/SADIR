@@ -9,10 +9,15 @@
 
 namespace nadir::render {
 
+enum class StateQuality {
+    Unknown, Simulated, Observed, Estimated, Propagated, Predicted, Precise, Stale, Invalid
+};
+
 struct PointEntity {
     std::uint64_t id{};
     nadir::math::Vec3d position{};
     float intensity{1.0f};
+    StateQuality quality{StateQuality::Unknown};
     std::string label;
 };
 
@@ -20,6 +25,7 @@ struct PolylineEntity {
     std::uint64_t id{};
     std::vector<nadir::math::Vec3d> points;
     float intensity{1.0f};
+    StateQuality quality{StateQuality::Unknown};
 };
 
 struct LabelEntity {
@@ -33,7 +39,7 @@ struct SceneSnapshot {
     std::int64_t utc_ns{};
 
     std::vector<PointEntity> points;
-    std::vector<std::vector<nadir::math::Vec3d>> polylines;
+    std::vector<PolylineEntity> polylines;
     std::vector<LabelEntity> labels;
 };
 

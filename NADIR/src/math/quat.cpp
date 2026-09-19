@@ -30,6 +30,10 @@ Quatd& Quatd::operator*=(const Quatd& rhs) noexcept {
     return *this;
 }
 
+Quatd Quatd::identity() noexcept {
+    return Quatd{1.0, 0.0, 0.0, 0.0};
+}
+
 Quatd Quatd::from_axis_angle(const nadir::math::Vec3d& axis, double radians) noexcept {
     const double half = radians * 0.5;
     const double s = std::sin(half);

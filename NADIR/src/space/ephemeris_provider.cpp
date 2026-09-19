@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <chrono>
+#include <optional>
 
 namespace nadir::space {
 
@@ -11,12 +12,6 @@ namespace {
 constexpr double pi = 3.141592653589793238462643383279502884;
 constexpr double deg_to_rad(double deg) noexcept {
     return deg * pi / 180.0;
-}
-
-std::string format_jd(double jd) {
-    std::ostringstream oss;
-    oss << std::fixed << std::setprecision(6) << jd;
-    return oss.str();
 }
 
 std::string utc_ns_to_jd_str(std::int64_t utc_ns) {
@@ -91,7 +86,8 @@ EphemerisResult HorizonsEphemerisProvider::fetch(const EphemerisQuery& query) {
     EphemerisResult result{};
     const auto url = build_url(query);
 
-    const auto response = nadir::data::http_get(url);
+    nadir::data::HttpClient client;
+    const auto response = client.get(url);
     if (!response.ok) {
         result.error = "HTTP error: " + response.error;
         return result;
