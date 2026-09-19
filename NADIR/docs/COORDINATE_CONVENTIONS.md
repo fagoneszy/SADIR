@@ -41,6 +41,8 @@ Rules:
 - Render `World` is never an orbital frame. Use explicit converters `TEME->PEF->ITRF` and `ITRF->WGS84`.
 - Never reuse a solar-system ephemeris directly as a render-world position without a frame transform.
 - 4D hyperprojection uses a separate `w` channel and is explicitly tagged (`4D_TIME`, `4D_PHASE`).
+- `ReferenceFrame` defines orientation and reference-frame identity; future `PhysicalState` origin semantics remain explicit and separate.
+- WGS84 is a geodetic reference system, not an orbital `FrameKind`; use it only after an explicit terrestrial Cartesian transform.
 
 ## Scale
 

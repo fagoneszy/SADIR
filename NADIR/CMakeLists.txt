@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(nadir_units INTERFACE)
 target_include_directories(nadir_units INTERFACE include)
+add_library(nadir_frames INTERFACE)
+target_include_directories(nadir_frames INTERFACE include)
 
 add_library(nadir_core
     src/core/terminal.cpp
@@ -84,6 +86,10 @@ if(BUILD_TESTING)
     add_executable(nadir_time_tests tests/test_time.cpp)
     target_link_libraries(nadir_time_tests PRIVATE nadir_core)
     add_test(NAME nadir_time_tests COMMAND nadir_time_tests)
+
+    add_executable(nadir_frames_tests tests/test_frames.cpp)
+    target_link_libraries(nadir_frames_tests PRIVATE nadir_frames)
+    add_test(NAME nadir_frames_tests COMMAND nadir_frames_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
