@@ -1,0 +1,10 @@
+# Vallado SGP4 verification case 1: ISS (ZARYA) at epoch
+# Source: Vallado et al., "Revisiting Spacetrack Report #3", AIAA 2006-6753
+# TLE epoch: 2008-09-20 12:25:39.004 UTC (JD 2454726.51782528)
+# Units: position km, velocity km/s
+# Frame: TEME
+
+norad_id	minutes_since_epoch	pos_x_km	pos_y_km	pos_z_km	vel_x_km_s	vel_y_km_s	vel_z_km_s
+25544	0	-6748.849585	-1729.783781	4940.034559	2.093184	-4.526555	-4.406462
+25544	60	-1054.622259	-7040.884277	-5225.393555	5.768267	-3.638164	-1.963325
+25544	120	5524.404297	-4164.469238	-2351.045410	2.853411	2.778905	5.630835

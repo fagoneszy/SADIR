@@ -8,10 +8,14 @@
 #include <nadir/geo/eop.hpp>
 #include <nadir/geo/frames.hpp>
 #include <nadir/geo/wgs84.hpp>
+#include <nadir/orbit/sgp4.hpp>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 int main() {
     const nadir::geo::Geodetic g{0.0,0.0,0.0};
@@ -66,6 +70,46 @@ int main() {
 
     const double dop=nadir::geo::doppler_observed_hz(145800000.0,-1000.0);
     if (!(dop>145800000.0)) return 20;
+
+    const char* tle_path = "tests/data/sgp4/verification.tle";
+    std::ifstream tle_file(tle_path);
+    if (!tle_file.is_open()) return 21;
+
+    std::string line1, line2;
+    std::getline(tle_file, line1); // satellite name
+    std::getline(tle_file, line1);
+    std::getline(tle_file, line2);
+    tle_file.close();
+
+    std::string tle_json = R"json([{"OBJECT_NAME":"ISS (ZARYA)","OBJECT_ID":"1998-067A","EPOCH":"2008-09-20T12:25:39.004000","NORAD_CAT_ID":"25544","MEAN_MOTION":"15.72125391","ECCENTRICITY":"0.0006703","INCLINATION":"51.6416","RA_OF_ASC_NODE":"247.4627","ARG_OF_PERICENTER":"130.5360","MEAN_ANOMALY":"325.0288","BSTAR":"-0.000011606","MEAN_ELEMENT_THEORY":"SGP4"}])json";
+
+    const auto tle_op = nadir::astro::parse_omm_json(tle_json);
+    if (!tle_op.ok || tle_op.records.empty()) return 22;
+
+    const auto& rec = tle_op.records[0];
+
+    auto pos_err = [](const nadir::orbit::Vec3d& a, const nadir::orbit::Vec3d& b) {
+        auto d = a - b;
+        return d.norm();
+    };
+    auto vel_err = [](const nadir::orbit::Vec3d& a, const nadir::orbit::Vec3d& b) {
+        auto d = a - b;
+        return d.norm();
+    };
+
+    struct Expected { double m; nadir::orbit::Vec3d p; nadir::orbit::Vec3d v; };
+    std::vector<Expected> expected = {
+        {0,   {-6748.849585, -1729.783781, 4940.034559}, {2.093184, -4.526555, -4.406462}},
+        {60,  {-1054.622259, -7040.884277, -5225.393555}, {5.768267, -3.638164, -1.963325}},
+        {120, {5524.404297, -4164.469238, -2351.045410}, {2.853411, 2.778905, 5.630835}}
+    };
+
+    for (const auto& exp : expected) {
+        auto result = nadir::orbit::propagate_sgp4(rec, exp.m);
+        if (!result) return 23;
+        if (pos_err(result.state.position_km, exp.p) > 0.1) return 24; // 100m tolerance
+        if (vel_err(result.state.velocity_km_s, exp.v) > 0.001) return 25; // 1mm/s tolerance
+    }
 
     std::cout<<"OK\n";
     return 0;

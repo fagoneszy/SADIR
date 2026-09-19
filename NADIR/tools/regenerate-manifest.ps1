@@ -116,6 +116,9 @@ foreach ($Line in $Lines) {
         continue
     }
 
+    $Expected = $Parts[0].ToLowerInvariant()
+    $RelativePath = $Parts[1]
+
     $Path = Join-Path $Root ($RelativePath.Replace('/', '\'))
 
     if (-not (Test-Path -LiteralPath $Path)) {

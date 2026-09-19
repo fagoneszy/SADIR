@@ -1,0 +1,33 @@
+# Normalize line endings for source files
+* text=auto
+
+# C/C++ source files - LF
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.h text eol=lf
+*.c text eol=lf
+*.asm text eol=lf
+
+# CMake - LF
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+
+# Documentation - LF
+*.md text eol=lf
+*.txt text eol=lf
+*.tsv text eol=lf
+*.csv text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# PowerShell - CRLF
+*.ps1 text eol=crlf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.bin binary

@@ -27,12 +27,23 @@ add_library(nadir_core
     src/render/framebuffer.cpp
     src/render/line.cpp
     src/render/earth.cpp
+    src/render/frame_clock.cpp
+    src/render/camera.cpp
+    src/render/projection.cpp
+    src/render/scene.cpp
     src/satellite/tle.cpp
     src/spacecraft/architecture.cpp
     src/model/obj.cpp
     src/format/ndr.cpp
     src/system/station.cpp
     src/tui/app.cpp
+    src/orbit/sgp4.cpp
+    src/orbit/sgp4_init.cpp
+    src/orbit/sgp4_deep.cpp
+    src/math/quat.cpp
+    src/space/body.cpp
+    src/space/solar_catalog.cpp
+    src/space/ephemeris_provider.cpp
 )
 target_include_directories(nadir_core PUBLIC include)
 if(MSVC)
