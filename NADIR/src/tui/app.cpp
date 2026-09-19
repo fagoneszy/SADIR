@@ -18,6 +18,9 @@
 #include <nadir/geo/wgs84.hpp>
 #include <nadir/render/earth.hpp>
 #include <nadir/render/framebuffer.hpp>
+#include <nadir/render/frame_clock.hpp>
+#include <nadir/render/phosphor_buffer.hpp>
+#include <nadir/render/presenter.hpp>
 #include <nadir/satellite/tle.hpp>
 #include <nadir/spacecraft/architecture.hpp>
 #include <nadir/system/station.hpp>
@@ -161,8 +164,44 @@ int App::earth(const std::vector<std::string>& args) {
 }
 
 int App::earth_live(const std::vector<std::string>&) {
-    std::cout<<"earth live: realtime VT mode not yet wired in this commit (DEMO)\n";
-    std::cout<<"This stub exists to keep the build green while the render pipeline is finished.\n";
+    TerminalSession terminal;
+    if (!terminal.valid()) {
+        std::cout << "earth live requires an interactive VT terminal\n";
+        return 1;
+    }
+    const auto size = terminal.size();
+    const int cols = std::clamp(size.columns, 60, 180);
+    const int rows = std::clamp(size.rows, 22, 70);
+    render::PhosphorBuffer phosphor(cols * 2, (rows - 4) * 4, 0.25);
+    render::Presenter presenter(cols, rows);
+    render::FrameClock clock(30.0);
+    render::EarthView view{};
+    bool quit = false;
+    int frame = 0;
+    double yaw = 0.0;
+    while (!quit) {
+        const double dt = clock.tick();
+        const auto input = terminal.poll_input();
+        quit = input.quit;
+        yaw += dt * 12.0;
+        if (input.left) yaw -= dt * 45.0;
+        if (input.right) yaw += dt * 45.0;
+        if (input.up) view.pitch_deg += dt * 30.0;
+        if (input.down) view.pitch_deg -= dt * 30.0;
+        view.yaw_deg = yaw;
+        render::Framebuffer fb(phosphor.width(), phosphor.height());
+        render::draw_earth(fb, view);
+        phosphor.decay(dt);
+        for (int y = 0; y < fb.height(); ++y) for (int x = 0; x < fb.width(); ++x)
+            if (fb.get(x, y)) phosphor.inject_color(x, y, 1.0f, 0, 255, 119);
+        render::HUDState hud{};
+        hud.fps = clock.target_fps(); hud.frame = frame++; hud.frame_mode = "DEMO";
+        hud.camera_mode = "ORBIT"; hud.stars = false; hud.grid = true; hud.entities = 1;
+        hud.utc = utc_minute(std::chrono::system_clock::now());
+        presenter.render(phosphor, hud);
+        presenter.present(terminal);
+        clock.wait();
+    }
     return 0;
 }
 

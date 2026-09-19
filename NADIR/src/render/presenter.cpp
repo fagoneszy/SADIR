@@ -43,11 +43,10 @@ void Presenter::render(const PhosphorBuffer& phosphor, const HUDState& hud) {
 }
 
 void Presenter::render_phosphor_to_cells(const PhosphorBuffer& phosphor) {
-    const int cell_w = phosphor.width();
-    const int cell_h = phosphor.height();
-
-    for (int cy = 0; cy < cell_h; ++cy) {
-        for (int cx = 0; cx < cell_w; ++cx) {
+    std::fill(current_.begin(), current_.end(), TerminalCell{});
+    const int scene_rows = std::max(0, h_ - 4);
+    for (int cy = 0; cy < scene_rows; ++cy) {
+        for (int cx = 0; cx < w_; ++cx) {
             // Sample 2x4 subpixels from phosphor buffer
             float samples[2][4] = {};
             for (int sy = 0; sy < 4; ++sy) {
@@ -61,7 +60,7 @@ void Presenter::render_phosphor_to_cells(const PhosphorBuffer& phosphor) {
             }
 
             const char32_t glyph = encode_braille_cell(samples);
-            const auto& cell = phosphor.get_cell(cx, cy);
+            const auto cell = phosphor.get_cell(cx * 2, cy * 4);
 
             const int idx = cy * w_ + cx;
             current_[idx].glyph = glyph;
@@ -116,7 +115,7 @@ void Presenter::present(nadir::TerminalSession& terminal) {
 
 void Presenter::write_diff(nadir::TerminalSession& terminal) {
     // Write main frame
-    for (int cy = 0; cy < h_; ++cy) {
+    for (int cy = 0; cy < h_ - 4; ++cy) {
         bool row_changed = false;
         int first_changed = -1;
         int last_changed = -1;
