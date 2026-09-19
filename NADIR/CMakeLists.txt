@@ -16,6 +16,12 @@ target_link_libraries(nadir_frames INTERFACE nadir_time)
 add_library(nadir_state INTERFACE)
 target_include_directories(nadir_state INTERFACE include)
 target_link_libraries(nadir_state INTERFACE nadir_math nadir_units nadir_time nadir_frames)
+add_library(nadir_scene
+    src/render/scene.cpp
+    src/render/scene_builder.cpp
+)
+target_include_directories(nadir_scene PUBLIC include)
+target_link_libraries(nadir_scene PUBLIC nadir_state nadir_math)
 
 add_library(nadir_core
     src/core/terminal.cpp
@@ -49,7 +55,6 @@ add_library(nadir_core
     src/render/frame_clock.cpp
     src/render/camera.cpp
     src/render/projection.cpp
-    src/render/scene.cpp
     src/render/phosphor_buffer.cpp
     src/render/presenter.cpp
     src/render/earth_mesh.cpp
@@ -103,6 +108,10 @@ if(BUILD_TESTING)
     add_executable(nadir_state_tests tests/test_state.cpp)
     target_link_libraries(nadir_state_tests PRIVATE nadir_state)
     add_test(NAME nadir_state_tests COMMAND nadir_state_tests)
+
+    add_executable(nadir_scene_tests tests/test_scene.cpp)
+    target_link_libraries(nadir_scene_tests PRIVATE nadir_scene)
+    add_test(NAME nadir_scene_tests COMMAND nadir_scene_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
