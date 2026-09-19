@@ -3,6 +3,9 @@ project(nadir VERSION 0.3.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+add_library(nadir_units INTERFACE)
+target_include_directories(nadir_units INTERFACE include)
+
 add_library(nadir_core
     src/core/terminal.cpp
     src/core/time.cpp
@@ -68,6 +71,10 @@ if(BUILD_TESTING)
     add_executable(nadir_render_tests tests/test_render.cpp)
     target_link_libraries(nadir_render_tests PRIVATE nadir_core)
     add_test(NAME nadir_render_tests COMMAND nadir_render_tests)
+
+    add_executable(nadir_units_tests tests/test_units.cpp)
+    target_link_libraries(nadir_units_tests PRIVATE nadir_units)
+    add_test(NAME nadir_units_tests COMMAND nadir_units_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
