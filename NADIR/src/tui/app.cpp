@@ -14,6 +14,7 @@
 #include <nadir/earth/fireball.hpp>
 #include <nadir/earth/seismic.hpp>
 #include <nadir/earth/space_weather.hpp>
+#include <nadir/format/ndr.hpp>
 #include <nadir/geo/eop.hpp>
 #include <nadir/geo/wgs84.hpp>
 #include <nadir/orbit/pass_predictor.hpp>
@@ -127,6 +128,7 @@ int App::command(const std::vector<std::string>& args) {
     if (args[0]=="presets") return presets(args);
     if (args[0]=="sync") return sync(args);
     if (args[0]=="cache") return cache(args);
+    if (args[0]=="ndr") return ndr(args);
     if (args[0]=="body") return body(args);
     if (args[0]=="targets") return targets(args);
     if (args[0]=="target") return target(args);
@@ -362,6 +364,48 @@ int App::cache(const std::vector<std::string>& args) {
     const bool valid=store.verify(args[1]);
     std::cout<<"SOURCE  "<<i->source_id<<"\nFETCHED "<<core::iso8601_utc(i->fetched_unix_ns)<<"\nAGE     "<<std::fixed<<std::setprecision(1)<<age<<" s\nBYTES   "<<i->bytes<<"\nSHA256  "<<i->sha256<<"\nVERIFY  "<<(valid?"PASS":"FAIL")<<"\nSTATUS  "<<i->http_status<<"\nPATH    "<<i->data_path<<"\nURL     "<<i->url<<"\n";
     return valid?0:2;
+}
+
+int App::ndr(const std::vector<std::string>& args) {
+    if (args.size() < 3 || args.size() > 4 || (args[1] != "inspect" && args[1] != "seek")) {
+        std::cout << "ndr inspect <path>\nndr seek <path> <timestamp_ns>\n";
+        return 1;
+    }
+    const auto file = format::read_ndr(args[2]);
+    if (!file) { std::cout << "NDR READ FAILED\n"; return 1; }
+    if (args[1] == "inspect") {
+        if (args.size() != 3) { std::cout << "ndr inspect <path>\n"; return 1; }
+        std::cout << "NDR V" << file->header.version << "\nTYPE " << file->header.type
+                  << "\nTIMESTAMP " << file->header.timestamp_ns << "\nRECORDS " << file->records.size()
+                  << "\nCRC32 " << file->header.crc32 << "\n";
+        return 0;
+    }
+    if (args.size() != 4) { std::cout << "ndr seek <path> <timestamp_ns>\n"; return 1; }
+    std::uint64_t timestamp{};
+    try { timestamp = std::stoull(args[3]); } catch (...) { std::cout << "INVALID TIMESTAMP\n"; return 1; }
+    const format::NdrReplay replay{*file};
+    const auto* record = replay.seek(timestamp);
+    if (!record) { std::cout << "NO RECORD AT OR BEFORE " << timestamp << "\n"; return 1; }
+    std::cout << "TIMESTAMP " << record->timestamp_ns << "\nTYPE " << record->type
+              << "\nPAYLOAD " << record->payload.size() << "\n";
+    switch (static_cast<format::NdrRecordType>(record->type)) {
+    case format::NdrRecordType::Source:
+        if (const auto source = format::decode_source_block(record->payload))
+            std::cout << "SOURCE " << source->source_id << "\nSHA256 " << source->sha256 << "\nBYTES " << source->bytes << "\n";
+        break;
+    case format::NdrRecordType::Object:
+        if (const auto object = format::decode_object_block(record->payload))
+            std::cout << "OBJECT " << object->object_id << "\nCATALOG " << object->catalog_id << "\nNAME " << object->name << "\n";
+        break;
+    case format::NdrRecordType::State:
+        if (const auto state = format::decode_state_block(record->payload))
+            std::cout << "OBJECT " << state->object_id << "\nX " << state->state.position_m.x << "\nY " << state->state.position_m.y
+                      << "\nZ " << state->state.position_m.z << "\n";
+        break;
+    case format::NdrRecordType::Event:
+        break;
+    }
+    return 0;
 }
 
 int App::body(const std::vector<std::string>& args) {
@@ -687,6 +731,7 @@ void App::help() const {
     std::cout<<"presets [name]\n";
     std::cout<<"sync <source-id|domain:name|preset:name>\n";
     std::cout<<"cache <source-id>\n";
+    std::cout<<"ndr inspect <path>\nndr seek <path> <timestamp_ns>\n";
     std::cout<<"orbit list <source|group> [query] [limit]\n";
     std::cout<<"orbit live <source|group> [query] [limit]\n";
     std::cout<<"orbit inspect <source|group> <query> [lat lon alt_m frequency_hz]\n";

@@ -1,8 +1,11 @@
 #include <nadir/format/ndr.hpp>
+#include <nadir/tui/app.hpp>
 
 #include <array>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <vector>
 
 int main() {
@@ -30,6 +33,13 @@ int main() {
     if (!nadir::format::write_ndr(path, {.type = 7, .timestamp_ns = 42}, records)) return 1;
     const auto read = nadir::format::read_ndr(path);
     if (!read || read->header.type != 7 || read->header.timestamp_ns != 42 || read->records != records) return 2;
+    std::ostringstream console;
+    auto* const previous_console = std::cout.rdbuf(console.rdbuf());
+    const int inspect_status = nadir::tui::App{}.run({"ndr", "inspect", path.string()});
+    const int seek_status = nadir::tui::App{}.run({"ndr", "seek", path.string(), "150"});
+    std::cout.rdbuf(previous_console);
+    if (inspect_status != 0 || seek_status != 0 || console.str().find("RECORDS 3") == std::string::npos ||
+        console.str().find("NAME ISS (ZARYA)") == std::string::npos) return 11;
     const nadir::format::NdrReplay replay(*read);
     if (replay.seek(99) || !replay.seek(100) || replay.seek(150)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::Object) ||
         replay.seek(999)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::State)) return 3;

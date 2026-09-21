@@ -20,6 +20,7 @@ private:
     int source(const std::vector<std::string>& args);
     int sync(const std::vector<std::string>& args);
     int cache(const std::vector<std::string>& args);
+    int ndr(const std::vector<std::string>& args);
     int body(const std::vector<std::string>& args);
     int targets(const std::vector<std::string>& args);
     int target(const std::vector<std::string>& args);
