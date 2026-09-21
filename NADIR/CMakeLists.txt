@@ -72,6 +72,7 @@ add_library(nadir_core
     src/orbit/sgp4.cpp
     src/orbit/sgp4_init.cpp
     src/orbit/sgp4_deep.cpp
+    src/orbit/pass_predictor.cpp
     third_party/vallado/SGP4.cpp
     src/math/quat.cpp
     src/space/body.cpp
@@ -137,6 +138,10 @@ if(BUILD_TESTING)
     add_executable(nadir_omm_tests tests/test_omm.cpp)
     target_link_libraries(nadir_omm_tests PRIVATE nadir_core)
     add_test(NAME nadir_omm_tests COMMAND nadir_omm_tests)
+
+    add_executable(nadir_pass_predictor_tests tests/test_pass_predictor.cpp)
+    target_link_libraries(nadir_pass_predictor_tests PRIVATE nadir_core)
+    add_test(NAME nadir_pass_predictor_tests COMMAND nadir_pass_predictor_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
