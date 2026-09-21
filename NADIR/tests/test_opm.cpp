@@ -17,6 +17,8 @@ Y_DOT = 7.5 [km/s]
 Z_DOT = 1.0 [km/s]
 )");
     if (!parsed.ok || !parsed.record || parsed.record->state_m.position_m.x != 7'000'000.0 || parsed.record->state_m.velocity_m_s.y != 7'500.0) return 1;
-    if (nadir::astro::parse_opm_kvn("OBJECT_NAME = missing").ok) return 2;
-    return nadir::astro::parse_opm_kvn(std::string(1024U * 1024U + 1U, 'x')).ok ? 3 : 0;
+    const auto round_trip=nadir::astro::parse_opm_kvn(nadir::astro::write_opm_kvn(*parsed.record));
+    if (!round_trip.ok || !round_trip.record || round_trip.record->state_m.position_m.x != 7'000'000.0 || round_trip.record->state_m.velocity_m_s.y != 7'500.0) return 2;
+    if (nadir::astro::parse_opm_kvn("OBJECT_NAME = missing").ok) return 3;
+    return nadir::astro::parse_opm_kvn(std::string(1024U * 1024U + 1U, 'x')).ok ? 4 : 0;
 }

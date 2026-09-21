@@ -26,5 +26,6 @@ struct OpmParseResult {
 // Parses a single CCSDS OPM KVN message. Cartesian X/Y/Z are km and
 // X_DOT/Y_DOT/Z_DOT are km/s on the wire, normalized to SI in the result.
 OpmParseResult parse_opm_kvn(const std::string& text);
+std::string write_opm_kvn(const OpmRecord& record);
 
 } // namespace nadir::astro

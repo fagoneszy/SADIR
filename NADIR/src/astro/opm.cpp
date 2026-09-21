@@ -50,4 +50,16 @@ OpmParseResult parse_opm_kvn(const std::string& text) {
     return {true, std::move(record), {}};
 }
 
+std::string write_opm_kvn(const OpmRecord& record) {
+    std::ostringstream out;
+    out.precision(17);
+    const auto field=[&](const char* key, const std::string& value) { if (!value.empty()) out<<key<<" = "<<value<<'\n'; };
+    out<<"CCSDS_OPM_VERS = 3.0\n";
+    field("OBJECT_NAME",record.object_name); field("OBJECT_ID",record.object_id); field("CENTER_NAME",record.center_name);
+    field("REF_FRAME",record.ref_frame); field("TIME_SYSTEM",record.time_system); field("EPOCH",record.epoch);
+    out<<"X = "<<record.state_m.position_m.x/1000.0<<" [km]\nY = "<<record.state_m.position_m.y/1000.0<<" [km]\nZ = "<<record.state_m.position_m.z/1000.0<<" [km]\n";
+    out<<"X_DOT = "<<record.state_m.velocity_m_s.x/1000.0<<" [km/s]\nY_DOT = "<<record.state_m.velocity_m_s.y/1000.0<<" [km/s]\nZ_DOT = "<<record.state_m.velocity_m_s.z/1000.0<<" [km/s]\n";
+    return out.str();
+}
+
 } // namespace nadir::astro
