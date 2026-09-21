@@ -122,6 +122,10 @@ if(BUILD_TESTING)
     target_link_libraries(nadir_time_tests PRIVATE nadir_core)
     add_test(NAME nadir_time_tests COMMAND nadir_time_tests)
 
+    add_executable(nadir_time_controller_tests tests/test_time_controller.cpp)
+    target_link_libraries(nadir_time_controller_tests PRIVATE nadir_core)
+    add_test(NAME nadir_time_controller_tests COMMAND nadir_time_controller_tests)
+
     add_executable(nadir_frames_tests tests/test_frames.cpp)
     target_link_libraries(nadir_frames_tests PRIVATE nadir_core)
     add_test(NAME nadir_frames_tests COMMAND nadir_frames_tests)
