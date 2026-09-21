@@ -17,9 +17,9 @@ nadir::math::Vec3d geodetic_surface_point(double latitude_rad, double longitude_
     const double cos_lat = std::cos(latitude_rad);
     const double n = wgs84_a_m / std::sqrt(1.0 - wgs84_e2 * sin_lat * sin_lat);
     return {
-        (n * cos_lat * std::cos(longitude_rad)) / wgs84_a_m,
-        (n * cos_lat * std::sin(longitude_rad)) / wgs84_a_m,
-        (n * (1.0 - wgs84_e2) * sin_lat) / wgs84_a_m
+        n * cos_lat * std::cos(longitude_rad),
+        n * cos_lat * std::sin(longitude_rad),
+        n * (1.0 - wgs84_e2) * sin_lat
     };
 }
 }
@@ -31,7 +31,7 @@ EarthMesh generate_earth_mesh(int latitude_steps, int longitude_steps) {
 
     if (latitude_steps < 1 || longitude_steps < 3) return mesh;
 
-    // Generate WGS84 geodetic surface points, normalized only at the render boundary.
+    // Generate WGS84 geodetic surface points in Earth-centered SI metres.
     for (int lat_idx = 0; lat_idx <= latitude_steps; ++lat_idx) {
         const double lat = -pi/2 + pi * lat_idx / latitude_steps;
         for (int lon_idx = 0; lon_idx <= longitude_steps; ++lon_idx) {

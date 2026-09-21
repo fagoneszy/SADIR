@@ -129,6 +129,10 @@ if(BUILD_TESTING)
     target_link_libraries(nadir_ellipsoid_occlusion_tests PRIVATE nadir_core)
     add_test(NAME nadir_ellipsoid_occlusion_tests COMMAND nadir_ellipsoid_occlusion_tests)
 
+    add_executable(nadir_earth_mesh_tests tests/test_earth_mesh.cpp)
+    target_link_libraries(nadir_earth_mesh_tests PRIVATE nadir_core)
+    add_test(NAME nadir_earth_mesh_tests COMMAND nadir_earth_mesh_tests)
+
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
     add_test(NAME nadir_sgp4_verification COMMAND nadir_sgp4_verification)

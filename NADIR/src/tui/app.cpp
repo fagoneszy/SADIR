@@ -17,10 +17,13 @@
 #include <nadir/geo/eop.hpp>
 #include <nadir/geo/wgs84.hpp>
 #include <nadir/render/earth.hpp>
+#include <nadir/render/earth_mesh.hpp>
 #include <nadir/render/framebuffer.hpp>
 #include <nadir/render/frame_clock.hpp>
 #include <nadir/render/phosphor_buffer.hpp>
 #include <nadir/render/presenter.hpp>
+#include <nadir/render/renderer3d.hpp>
+#include <nadir/render/scene_builder.hpp>
 #include <nadir/satellite/tle.hpp>
 #include <nadir/spacecraft/architecture.hpp>
 #include <nadir/system/station.hpp>
@@ -169,13 +172,31 @@ int App::earth_live(const std::vector<std::string>&) {
         std::cout << "earth live requires an interactive VT terminal\n";
         return 1;
     }
-    const auto size = terminal.size();
-    const int cols = std::clamp(size.columns, 60, 180);
-    const int rows = std::clamp(size.rows, 22, 70);
-    render::PhosphorBuffer phosphor(cols * 2, (rows - 4) * 4, 0.25);
+    const auto epoch = time::TimeInstant{0, 0};
+    const auto frame_ref = frames::itrf2020();
+    const auto origin = state::earth_center();
+    render::SceneBuilder builder{epoch, frame_ref, origin};
+    const state::TrackedState earth{399, {{}, {}, epoch, frame_ref, origin},
+                                    state::StateKind::Simulated, state::StateQuality::Nominal};
+    if (!builder.add_object(earth)) return 1;
+    const auto mesh = render::generate_earth_mesh(12, 24);
+    for (const auto& edge : mesh.lines)
+        builder.add_polyline({1, {mesh.vertices[edge[0]], mesh.vertices[edge[1]]}, 0.70f});
+    const auto scene = builder.build();
+    if (!scene.valid()) return 1;
+
+    auto size = terminal.size();
+    int cols = std::clamp(size.columns, 60, 180);
+    int rows = std::clamp(size.rows, 22, 70);
+    render::Renderer3D renderer(cols * 2, (rows - 4) * 4);
+    renderer.set_ellipsoid_occlusion({true, {}, render::wgs84_ellipsoid(), 1});
     render::Presenter presenter(cols, rows);
     render::FrameClock clock(30.0);
-    render::EarthView view{};
+    render::Camera camera{};
+    camera.distance = 3.5;
+    camera.near_plane = 0.10;
+    camera.far_plane = 100.0;
+    render::DisplayTransform display{};
     bool quit = false;
     int frame = 0;
     double yaw = 0.0;
@@ -183,22 +204,26 @@ int App::earth_live(const std::vector<std::string>&) {
         const double dt = clock.tick();
         const auto input = terminal.poll_input();
         quit = input.quit;
-        yaw += dt * 12.0;
-        if (input.left) yaw -= dt * 45.0;
-        if (input.right) yaw += dt * 45.0;
-        if (input.up) view.pitch_deg += dt * 30.0;
-        if (input.down) view.pitch_deg -= dt * 30.0;
-        view.yaw_deg = yaw;
-        render::Framebuffer fb(phosphor.width(), phosphor.height());
-        render::draw_earth(fb, view);
-        phosphor.decay(dt);
-        for (int y = 0; y < fb.height(); ++y) for (int x = 0; x < fb.width(); ++x)
-            if (fb.get(x, y)) phosphor.inject_color(x, y, 1.0f, 0, 255, 119);
+        yaw += dt * 0.20;
+        if (input.left) yaw -= dt * 0.75;
+        if (input.right) yaw += dt * 0.75;
+        if (input.up) camera.pitch(dt * 0.50);
+        if (input.down) camera.pitch(-dt * 0.50);
+        if (input.zoom_in) camera.zoom(-dt);
+        if (input.zoom_out) camera.zoom(dt);
+        camera.yaw(yaw);
+        yaw = 0.0;
+        size = terminal.size();
+        cols = std::clamp(size.columns, 60, 180);
+        rows = std::clamp(size.rows, 22, 70);
+        renderer.resize(cols * 2, (rows - 4) * 4);
+        presenter.resize(cols, rows);
+        renderer.render(scene, camera, display, dt);
         render::HUDState hud{};
-        hud.fps = clock.target_fps(); hud.frame = frame++; hud.frame_mode = "DEMO";
-        hud.camera_mode = "ORBIT"; hud.stars = false; hud.grid = true; hud.entities = 1;
+        hud.fps = clock.target_fps(); hud.frame = frame++; hud.frame_mode = "DEMO ITRF2020 WGS84";
+        hud.camera_mode = "ORBIT SYNTHETIC"; hud.stars = false; hud.grid = true; hud.entities = 1;
         hud.utc = utc_minute(std::chrono::system_clock::now());
-        presenter.render(phosphor, hud);
+        presenter.render(renderer.phosphor(), hud);
         presenter.present(terminal);
         clock.wait();
     }
