@@ -1,0 +1,30 @@
+#include <nadir/render/clip.hpp>
+#include <nadir/render/depth_buffer.hpp>
+
+#include <cmath>
+#include <limits>
+
+int main() {
+    using namespace nadir;
+
+    render::DepthBuffer depth(2, 2);
+    if (!depth.test_and_write(0, 0, 5.0) || depth.test_and_write(0, 0, 8.0) ||
+        !depth.test_and_write(0, 0, 2.0) || depth.get(0, 0) != 2.0) return 1;
+    if (depth.test_and_write(0, 0, 0.0) || depth.test_and_write(-1, 0, 1.0) ||
+        depth.test_and_write(0, 0, std::numeric_limits<double>::quiet_NaN())) return 2;
+    depth.clear();
+    if (depth.get(0, 0) != std::numeric_limits<double>::infinity()) return 3;
+
+    const auto near_clip = render::clip_depth({0.0, 0.0, -0.5}, {0.0, 0.0, -4.0}, 1.0, 3.0);
+    if (!near_clip.visible || std::abs(near_clip.a.z + 1.0) > 1e-12 ||
+        std::abs(near_clip.b.z + 3.0) > 1e-12) return 4;
+    if (render::clip_depth({0.0, 0.0, -0.2}, {0.0, 0.0, -0.4}, 1.0, 3.0).visible) return 5;
+
+    const auto ndc_clip = render::clip_ndc({-2.0, 0.0, 1.0, true}, {0.5, 0.0, 0.25, true});
+    if (!ndc_clip.visible || !ndc_clip.clipped || std::abs(ndc_clip.a.x + 1.0) > 1e-12 ||
+        std::abs(ndc_clip.a.inverse_depth - 0.7) > 1e-12) return 6;
+    if (render::clip_ndc({2.0, 2.0, 1.0, true}, {3.0, 3.0, 1.0, true}).visible) return 7;
+    if (render::clip_ndc({0.0, 0.0, std::numeric_limits<double>::quiet_NaN(), true},
+                         {0.5, 0.0, 1.0, true}).visible) return 8;
+    return 0;
+}

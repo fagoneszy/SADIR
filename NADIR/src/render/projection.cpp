@@ -19,7 +19,7 @@ ProjectedPoint project_perspective(
 
     const double depth = -view.z;
 
-    if (!std::isfinite(depth) || depth <= near_plane || depth >= far_plane) {
+    if (!std::isfinite(depth) || depth < near_plane || depth > far_plane) {
         return ProjectedPoint{};
     }
 
@@ -30,7 +30,7 @@ ProjectedPoint project_perspective(
     out.y_ndc = (view.y * scale) / depth;
     out.depth = depth;
 
-    out.visible = std::abs(out.x_ndc) <= 1.0 && std::abs(out.y_ndc) <= 1.0;
+    out.visible = std::isfinite(out.x_ndc) && std::isfinite(out.y_ndc);
 
     return out;
 }

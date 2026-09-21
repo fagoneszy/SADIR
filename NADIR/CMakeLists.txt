@@ -55,6 +55,10 @@ add_library(nadir_core
     src/render/frame_clock.cpp
     src/render/camera.cpp
     src/render/projection.cpp
+    src/render/depth_buffer.cpp
+    src/render/display_transform.cpp
+    src/render/clip.cpp
+    src/render/renderer3d.cpp
     src/render/phosphor_buffer.cpp
     src/render/presenter.cpp
     src/render/earth_mesh.cpp
@@ -73,6 +77,7 @@ add_library(nadir_core
     src/space/ephemeris_provider.cpp
 )
 target_include_directories(nadir_core PUBLIC include)
+target_link_libraries(nadir_core PRIVATE nadir_scene)
 if(MSVC)
     target_compile_options(nadir_core PRIVATE /W4 /permissive-)
 else()
@@ -83,6 +88,8 @@ if(WIN32)
 endif()
 add_executable(nadir src/main.cpp)
 target_link_libraries(nadir PRIVATE nadir_core)
+add_executable(nadir_render_demo tests/render_demo3d.cpp)
+target_link_libraries(nadir_render_demo PRIVATE nadir_core)
 include(CTest)
 if(BUILD_TESTING)
     add_executable(nadir_tests tests/test_main.cpp)
@@ -112,6 +119,10 @@ if(BUILD_TESTING)
     add_executable(nadir_scene_tests tests/test_scene.cpp)
     target_link_libraries(nadir_scene_tests PRIVATE nadir_scene)
     add_test(NAME nadir_scene_tests COMMAND nadir_scene_tests)
+
+    add_executable(nadir_renderer3d_tests tests/test_renderer3d.cpp)
+    target_link_libraries(nadir_renderer3d_tests PRIVATE nadir_core)
+    add_test(NAME nadir_renderer3d_tests COMMAND nadir_renderer3d_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
