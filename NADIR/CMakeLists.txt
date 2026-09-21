@@ -43,6 +43,7 @@ add_library(nadir_core
     src/astro/targets.cpp
     src/astro/horizons.cpp
     src/astro/omm.cpp
+    src/astro/opm.cpp
     src/astro/catalog.cpp
     src/astro/sun.cpp
     src/geo/wgs84.cpp
@@ -160,6 +161,10 @@ if(BUILD_TESTING)
     add_executable(nadir_omm_tests tests/test_omm.cpp)
     target_link_libraries(nadir_omm_tests PRIVATE nadir_core)
     add_test(NAME nadir_omm_tests COMMAND nadir_omm_tests)
+
+    add_executable(nadir_opm_tests tests/test_opm.cpp)
+    target_link_libraries(nadir_opm_tests PRIVATE nadir_core)
+    add_test(NAME nadir_opm_tests COMMAND nadir_opm_tests)
 
     add_executable(nadir_pass_predictor_tests tests/test_pass_predictor.cpp)
     target_link_libraries(nadir_pass_predictor_tests PRIVATE nadir_core)
