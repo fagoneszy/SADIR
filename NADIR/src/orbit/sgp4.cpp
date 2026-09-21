@@ -1,5 +1,6 @@
 #include <nadir/orbit/sgp4.hpp>
 #include <nadir/orbit/sgp4_internal.hpp>
+#include "../../third_party/vallado/SGP4.h"
 #include <cmath>
 #include <limits>
 #include <cstdio>
@@ -27,7 +28,7 @@ Sgp4Elements omm_to_elements(const astro::OmmRecord& rec) {
             double m = month + 12.0 * a - 3.0;
             double jd = day + std::floor((153.0 * m + 2.0) / 5.0) + std::floor(365.0 * y) + std::floor(y / 4.0) - std::floor(y / 100.0) + std::floor(y / 400.0) - 32045.0;
             jd += (hour + minute / 60.0 + second / 3600.0) / 24.0;
-            elem.epoch_jd = jd;
+            elem.epoch_jd = jd - 0.5;
         }
     }
     return elem;
@@ -51,29 +52,37 @@ Sgp4Result propagate_sgp4(
     const astro::OmmRecord& elements,
     double minutes_since_epoch
 ) {
-    const auto constants = wgs72_constants();
     const auto elem = omm_to_elements(elements);
-
-    SatRec satrec{};
-    sgp4init(OpsMode::Afspc, elem, satrec, constants);
-
-    if (!std::isfinite(satrec.no_kozai)) {
+    if (!std::isfinite(minutes_since_epoch) || !std::isfinite(elem.epoch_jd) ||
+        !std::isfinite(elem.mean_motion_rad_min) || elem.mean_motion_rad_min <= 0.0 ||
+        elem.eccentricity < 0.0 || elem.eccentricity >= 1.0) {
         return Sgp4Result{
             State{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0, 0.0, 0.0, 0.0}, Frame::TEME},
             Sgp4Error::InvalidElements
         };
     }
 
-    Vec3d position_km{};
-    Vec3d velocity_km_s{};
+    elsetrec satrec{};
+    char satnum[6]{};
+    std::snprintf(satnum, sizeof(satnum), "%05llu",
+                  static_cast<unsigned long long>(elem.norad % 100000));
+    const bool initialized = SGP4Funcs::sgp4init(
+        wgs72, 'i', satnum, elem.epoch_jd - 2433281.5, elem.bstar, 0.0, 0.0,
+        elem.eccentricity, elem.arg_perigee_rad, elem.inclination_rad,
+        elem.mean_anomaly_rad, elem.mean_motion_rad_min, elem.raan_rad, satrec);
+    double position[3]{};
+    double velocity[3]{};
+    const bool propagated = initialized && SGP4Funcs::sgp4(satrec, minutes_since_epoch,
+                                                            position, velocity);
+    Vec3d position_km{position[0], position[1], position[2]};
+    Vec3d velocity_km_s{velocity[0], velocity[1], velocity[2]};
 
-    sgp4(satrec, minutes_since_epoch, position_km, velocity_km_s, constants);
-
-    if (!std::isfinite(position_km.x) || !std::isfinite(position_km.y) || !std::isfinite(position_km.z) ||
+    if (!propagated || !std::isfinite(position_km.x) || !std::isfinite(position_km.y) || !std::isfinite(position_km.z) ||
         !std::isfinite(velocity_km_s.x) || !std::isfinite(velocity_km_s.y) || !std::isfinite(velocity_km_s.z)) {
+        const auto error = satrec.error == 6 ? Sgp4Error::Decayed : Sgp4Error::NumericalFailure;
         return Sgp4Result{
             State{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0, 0.0, 0.0, 0.0}, Frame::TEME},
-            Sgp4Error::NumericalFailure
+            error
         };
     }
 

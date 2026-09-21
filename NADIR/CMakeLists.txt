@@ -72,6 +72,7 @@ add_library(nadir_core
     src/orbit/sgp4.cpp
     src/orbit/sgp4_init.cpp
     src/orbit/sgp4_deep.cpp
+    third_party/vallado/SGP4.cpp
     src/math/quat.cpp
     src/space/body.cpp
     src/space/solar_catalog.cpp

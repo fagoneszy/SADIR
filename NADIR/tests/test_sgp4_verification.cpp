@@ -26,9 +26,9 @@ int main() {
 
     struct Expected { double m; nadir::orbit::Vec3d p; nadir::orbit::Vec3d v; };
     std::vector<Expected> expected = {
-        {0,   {-6748.849585, -1729.783781, 4940.034559}, {2.093184, -4.526555, -4.406462}},
-        {60,  {-1054.622259, -7040.884277, -5225.393555}, {5.768267, -3.638164, -1.963325}},
-        {120, {5524.404297, -4164.469238, -2351.045410}, {2.853411, 2.778905, 5.630835}},
+        {0,   {4083.900545, -993.631911, 5243.600440}, {2.512840, 7.259888, -0.583779}},
+        {60,  {-4133.793345, -4683.155177, -2526.661599}, {2.443902, -5.007590, 5.298599}},
+        {120, {537.778823, 6247.338128, -2452.406166}, {-5.286183, -1.634624, -5.348149}},
     };
 
     double max_pe = 0.0, sum_pe2 = 0.0;
@@ -63,7 +63,7 @@ int main() {
               << " max_vel=" << max_ve << " rms_vel=" << rms_ve << "\n";
 
     if (any_fail) {
-        std::cout << "SGP4 verification FAIL (placeholder Keplerian expected)\n";
+        std::cout << "SGP4 Vallado verification FAIL\n";
         return 10;
     }
     std::cout << "SGP4 verification PASS\n";
