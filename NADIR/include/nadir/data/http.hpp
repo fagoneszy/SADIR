@@ -1,7 +1,10 @@
 #pragma once
+#include <cstddef>
 #include <string>
 
 namespace nadir::data {
+
+inline constexpr std::size_t max_http_body_bytes = 64U * 1024U * 1024U;
 
 struct HttpResponse {
     bool ok{};

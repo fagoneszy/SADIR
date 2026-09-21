@@ -25,7 +25,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 42 spacecraft geometry | foundation | OBJ only; STL/GLB provenance binding open. |
 | 43–46 Gaia/4D/network/geospatial layers | open | no implementation sufficient for roadmap scope. |
 | 47 fuzzing | foundation | deterministic mutation sweeps cover OPM, OEM and CDM; libFuzzer campaigns and remaining parsers are open. |
-| 48 ingestion security | foundation | cache hashes and OPM limits; global limits/TLS policy/content validation open. |
+| 48 ingestion security | foundation | cache hashes, parser limits, HTTPS-only transport and 64 MiB response cap; content-type/schema policy and broader TLS controls remain open. |
 | 49 benchmarks | foundation | deterministic SGP4 batch workload and JSON runner with machine metadata; renderer, memory and wider-catalog suites remain open. |
 | 50 science gate | foundation | Vallado SGP4 + TEME/ITRF oracle; wider science suite open. |
 | 51 network gate | open | no separate online-test gate. |
