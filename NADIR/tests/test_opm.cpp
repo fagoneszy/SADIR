@@ -1,5 +1,6 @@
 #include <nadir/astro/opm.hpp>
 #include <string>
+#include <cstdint>
 
 int main() {
     const auto parsed=nadir::astro::parse_opm_kvn(R"(CCSDS_OPM_VERS = 3.0
@@ -20,5 +21,14 @@ Z_DOT = 1.0 [km/s]
     const auto round_trip=nadir::astro::parse_opm_kvn(nadir::astro::write_opm_kvn(*parsed.record));
     if (!round_trip.ok || !round_trip.record || round_trip.record->state_m.position_m.x != 7'000'000.0 || round_trip.record->state_m.velocity_m_s.y != 7'500.0) return 2;
     if (nadir::astro::parse_opm_kvn("OBJECT_NAME = missing").ok) return 3;
-    return nadir::astro::parse_opm_kvn(std::string(1024U * 1024U + 1U, 'x')).ok ? 4 : 0;
+    if (nadir::astro::parse_opm_kvn(std::string(1024U * 1024U + 1U, 'x')).ok) return 4;
+    std::uint32_t state=0x9e3779b9U;
+    for (int sample=0; sample<512; ++sample) {
+        std::string fuzz;
+        const int length=static_cast<int>(state % 512U); state=state*1664525U+1013904223U;
+        fuzz.reserve(length);
+        for (int i=0; i<length; ++i) { state=state*1664525U+1013904223U; fuzz.push_back(static_cast<char>(state >> 24U)); }
+        (void)nadir::astro::parse_opm_kvn(fuzz);
+    }
+    return 0;
 }
