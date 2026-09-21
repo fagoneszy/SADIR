@@ -58,6 +58,7 @@ add_library(nadir_core
     src/render/depth_buffer.cpp
     src/render/display_transform.cpp
     src/render/clip.cpp
+    src/render/ellipsoid_occlusion.cpp
     src/render/renderer3d.cpp
     src/render/phosphor_buffer.cpp
     src/render/presenter.cpp
@@ -123,6 +124,10 @@ if(BUILD_TESTING)
     add_executable(nadir_renderer3d_tests tests/test_renderer3d.cpp)
     target_link_libraries(nadir_renderer3d_tests PRIVATE nadir_core)
     add_test(NAME nadir_renderer3d_tests COMMAND nadir_renderer3d_tests)
+
+    add_executable(nadir_ellipsoid_occlusion_tests tests/test_ellipsoid_occlusion.cpp)
+    target_link_libraries(nadir_ellipsoid_occlusion_tests PRIVATE nadir_core)
+    add_test(NAME nadir_ellipsoid_occlusion_tests COMMAND nadir_ellipsoid_occlusion_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)

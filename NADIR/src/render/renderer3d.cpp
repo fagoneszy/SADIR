@@ -1,6 +1,108 @@
 #include <nadir/render/renderer3d.hpp>
+
 #include <nadir/render/clip.hpp>
 #include <nadir/render/projection.hpp>
+
 #include <algorithm>
 #include <cmath>
-namespace nadir::render { bool Renderer3D::render(const SceneSnapshot&s,const Camera&c,const DisplayTransform&t,double dt){stats_={};labels_.clear();depth_.clear();phosphor_.decay(std::max(0.0,dt));if(!s.valid()||phosphor_.width()<=0||phosphor_.height()<=0)return false;auto inside=[](const ProjectedPoint&p){return p.visible&&std::abs(p.x_ndc)<=1&&std::abs(p.y_ndc)<=1;};auto draw=[&](auto a,auto b,float in){auto z=clip_depth(c.world_to_view(to_render_space(a,t)),c.world_to_view(to_render_space(b,t)),c.near_plane,c.far_plane);if(!z.visible)return;auto p0=project_perspective(z.a,c.fov_deg,double(phosphor_.width())/phosphor_.height(),c.near_plane,c.far_plane),p1=project_perspective(z.b,c.fov_deg,double(phosphor_.width())/phosphor_.height(),c.near_plane,c.far_plane);auto k=clip_ndc({p0.x_ndc,p0.y_ndc,1/p0.depth,p0.visible},{p1.x_ndc,p1.y_ndc,1/p1.depth,p1.visible});if(!k.visible)return;ProjectedPoint x{k.a.x,k.a.y,1/k.a.inverse_depth,true},y{k.b.x,k.b.y,1/k.b.inverse_depth,true};auto q0=ndc_to_viewport(x,phosphor_.width(),phosphor_.height()),q1=ndc_to_viewport(y,phosphor_.width(),phosphor_.height());int n=std::max(1,int(std::ceil(std::max(std::abs(q1.x-q0.x),std::abs(q1.y-q0.y)))));for(int i=0;i<=n;++i){double u=double(i)/n,d=1/(k.a.inverse_depth+(k.b.inverse_depth-k.a.inverse_depth)*u);++stats_.depth_tests;if(depth_.test_and_write(int(std::lround(q0.x+(q1.x-q0.x)*u)),int(std::lround(q0.y+(q1.y-q0.y)*u)),d)){++stats_.depth_passes;phosphor_.inject(int(std::lround(q0.x+(q1.x-q0.x)*u)),int(std::lround(q0.y+(q1.y-q0.y)*u)),in);}}++stats_.segments_visible;if(k.clipped)++stats_.segments_clipped;};for(const auto&p:s.points){++stats_.points_submitted;auto q=project_perspective(c.world_to_view(to_render_space(p.position,t)),c.fov_deg,double(phosphor_.width())/phosphor_.height(),c.near_plane,c.far_plane);if(!inside(q))continue;auto sp=ndc_to_viewport(q,phosphor_.width(),phosphor_.height());++stats_.depth_tests;if(depth_.test_and_write(int(std::lround(sp.x)),int(std::lround(sp.y)),sp.depth)){phosphor_.inject(int(std::lround(sp.x)),int(std::lround(sp.y)),p.intensity);++stats_.depth_passes;++stats_.points_visible;}}for(const auto&l:s.polylines){for(size_t i=1;i<l.vertices.size();++i){++stats_.segments_submitted;draw(l.vertices[i-1],l.vertices[i],l.intensity);}if(l.closed&&l.vertices.size()>2){++stats_.segments_submitted;draw(l.vertices.back(),l.vertices.front(),l.intensity);}}for(const auto&l:s.labels){if(l.text.empty())continue;auto q=project_perspective(c.world_to_view(to_render_space(l.anchor,t)),c.fov_deg,double(phosphor_.width())/phosphor_.height(),c.near_plane,c.far_plane);if(inside(q)){auto p=ndc_to_viewport(q,phosphor_.width(),phosphor_.height());labels_.push_back({l.entity_id,int(std::lround(p.x)),int(std::lround(p.y)),p.depth,l.priority,l.text});}}std::sort(labels_.begin(),labels_.end(),[](auto&a,auto&b){return a.priority!=b.priority?a.priority>b.priority:a.depth<b.depth;});return true;} }
+
+namespace nadir::render {
+
+bool Renderer3D::render(const SceneSnapshot& scene, const Camera& camera,
+                        const DisplayTransform& transform, double delta_seconds) {
+    stats_ = {};
+    labels_.clear();
+    depth_.clear();
+    phosphor_.decay(std::max(0.0, delta_seconds));
+    if (!scene.valid() || phosphor_.width() <= 0 || phosphor_.height() <= 0) return false;
+
+    const double aspect = static_cast<double>(phosphor_.width()) / phosphor_.height();
+    const math::Vec3d camera_m = transform.physical_origin_m +
+        camera.position() * transform.meters_per_render_unit;
+    const auto is_occluded = [&](std::uint64_t entity_id, const math::Vec3d& position_m) {
+        return occlusion_.enabled && entity_id != occlusion_.occluder_entity_id &&
+            occluded_by_ellipsoid(camera_m, position_m - occlusion_.center_m, occlusion_.ellipsoid);
+    };
+    const auto inside = [](const ProjectedPoint& point) {
+        return point.visible && std::abs(point.x_ndc) <= 1.0 && std::abs(point.y_ndc) <= 1.0;
+    };
+    const auto rasterize = [&](const NdcPoint& a, const NdcPoint& b, float intensity) {
+        const auto first = ndc_to_viewport({a.x, a.y, 1.0 / a.inverse_depth, true},
+                                           phosphor_.width(), phosphor_.height());
+        const auto second = ndc_to_viewport({b.x, b.y, 1.0 / b.inverse_depth, true},
+                                            phosphor_.width(), phosphor_.height());
+        const int steps = std::max(1, static_cast<int>(std::ceil(std::max(
+            std::abs(second.x - first.x), std::abs(second.y - first.y)))));
+        for (int i = 0; i <= steps; ++i) {
+            const double ratio = static_cast<double>(i) / steps;
+            const double inverse_depth = a.inverse_depth + (b.inverse_depth - a.inverse_depth) * ratio;
+            if (!std::isfinite(inverse_depth) || inverse_depth <= 0.0) continue;
+            const int x = static_cast<int>(std::lround(first.x + (second.x - first.x) * ratio));
+            const int y = static_cast<int>(std::lround(first.y + (second.y - first.y) * ratio));
+            ++stats_.depth_tests;
+            if (depth_.test_and_write(x, y, 1.0 / inverse_depth)) {
+                ++stats_.depth_passes;
+                phosphor_.inject(x, y, intensity);
+            }
+        }
+    };
+    const auto draw_segment = [&](std::uint64_t entity_id, const math::Vec3d& first_m,
+                                  const math::Vec3d& second_m, float intensity) {
+        if (is_occluded(entity_id, first_m) || is_occluded(entity_id, second_m)) return;
+        const auto depth_segment = clip_depth(camera.world_to_view(to_render_space(first_m, transform)),
+                                              camera.world_to_view(to_render_space(second_m, transform)),
+                                              camera.near_plane, camera.far_plane);
+        if (!depth_segment.visible) return;
+        const auto first = project_perspective(depth_segment.a, camera.fov_deg, aspect,
+                                               camera.near_plane, camera.far_plane);
+        const auto second = project_perspective(depth_segment.b, camera.fov_deg, aspect,
+                                                camera.near_plane, camera.far_plane);
+        const auto ndc = clip_ndc({first.x_ndc, first.y_ndc, 1.0 / first.depth, first.visible},
+                                  {second.x_ndc, second.y_ndc, 1.0 / second.depth, second.visible});
+        if (!ndc.visible) return;
+        rasterize(ndc.a, ndc.b, intensity);
+        ++stats_.segments_visible;
+        if (ndc.clipped) ++stats_.segments_clipped;
+    };
+
+    for (const auto& point : scene.points) {
+        ++stats_.points_submitted;
+        if (is_occluded(point.entity_id, point.position)) continue;
+        const auto projected = project_perspective(camera.world_to_view(to_render_space(point.position, transform)),
+                                                   camera.fov_deg, aspect, camera.near_plane, camera.far_plane);
+        if (!inside(projected)) continue;
+        const auto screen = ndc_to_viewport(projected, phosphor_.width(), phosphor_.height());
+        ++stats_.depth_tests;
+        if (depth_.test_and_write(static_cast<int>(std::lround(screen.x)), static_cast<int>(std::lround(screen.y)), projected.depth)) {
+            phosphor_.inject(static_cast<int>(std::lround(screen.x)), static_cast<int>(std::lround(screen.y)), point.intensity);
+            ++stats_.depth_passes;
+            ++stats_.points_visible;
+        }
+    }
+    for (const auto& line : scene.polylines) {
+        for (std::size_t i = 1; i < line.vertices.size(); ++i) {
+            ++stats_.segments_submitted;
+            draw_segment(line.entity_id, line.vertices[i - 1], line.vertices[i], line.intensity);
+        }
+        if (line.closed && line.vertices.size() > 2) {
+            ++stats_.segments_submitted;
+            draw_segment(line.entity_id, line.vertices.back(), line.vertices.front(), line.intensity);
+        }
+    }
+    for (const auto& label : scene.labels) {
+        if (label.text.empty() || is_occluded(label.entity_id, label.anchor)) continue;
+        const auto projected = project_perspective(camera.world_to_view(to_render_space(label.anchor, transform)),
+                                                   camera.fov_deg, aspect, camera.near_plane, camera.far_plane);
+        if (!inside(projected)) continue;
+        const auto screen = ndc_to_viewport(projected, phosphor_.width(), phosphor_.height());
+        labels_.push_back({label.entity_id, static_cast<int>(std::lround(screen.x)),
+                           static_cast<int>(std::lround(screen.y)), projected.depth,
+                           label.priority, label.text});
+    }
+    std::sort(labels_.begin(), labels_.end(), [](const auto& a, const auto& b) {
+        return a.priority != b.priority ? a.priority > b.priority : a.depth < b.depth;
+    });
+    return true;
+}
+
+} // namespace nadir::render
