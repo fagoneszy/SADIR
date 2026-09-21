@@ -359,8 +359,9 @@ int App::cache(const std::vector<std::string>& args) {
     if (!i) { std::cout<<"NO CACHE\n"; return 1; }
     const auto now=core::now_utc().unix_ns;
     const double age=static_cast<double>(now-i->fetched_unix_ns)/1.0e9;
-    std::cout<<"SOURCE  "<<i->source_id<<"\nFETCHED "<<core::iso8601_utc(i->fetched_unix_ns)<<"\nAGE     "<<std::fixed<<std::setprecision(1)<<age<<" s\nBYTES   "<<i->bytes<<"\nSHA256  "<<i->sha256<<"\nSTATUS  "<<i->http_status<<"\nPATH    "<<i->data_path<<"\nURL     "<<i->url<<"\n";
-    return 0;
+    const bool valid=store.verify(args[1]);
+    std::cout<<"SOURCE  "<<i->source_id<<"\nFETCHED "<<core::iso8601_utc(i->fetched_unix_ns)<<"\nAGE     "<<std::fixed<<std::setprecision(1)<<age<<" s\nBYTES   "<<i->bytes<<"\nSHA256  "<<i->sha256<<"\nVERIFY  "<<(valid?"PASS":"FAIL")<<"\nSTATUS  "<<i->http_status<<"\nPATH    "<<i->data_path<<"\nURL     "<<i->url<<"\n";
+    return valid?0:2;
 }
 
 int App::body(const std::vector<std::string>& args) {
