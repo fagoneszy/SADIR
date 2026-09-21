@@ -1,6 +1,7 @@
 #include <nadir/format/ndr.hpp>
 
 #include <array>
+#include <bit>
 #include <fstream>
 #include <limits>
 #include <type_traits>
@@ -32,6 +33,16 @@ bool take_le(std::span<const std::uint8_t> bytes, std::size_t& offset, T& value)
     return true;
 }
 
+void append_double(std::vector<std::uint8_t>& out, double value) {
+    append_le(out, std::bit_cast<std::uint64_t>(value));
+}
+bool take_double(std::span<const std::uint8_t> bytes, std::size_t& offset, double& value) {
+    std::uint64_t bits{};
+    if (!take_le(bytes, offset, bits)) return false;
+    value=std::bit_cast<double>(bits);
+    return std::isfinite(value);
+}
+
 void append_header(std::vector<std::uint8_t>& out, const NdrHeader& header) {
     out.insert(out.end(), header.magic.begin(), header.magic.end());
     append_le(out, header.version);
@@ -61,6 +72,23 @@ std::uint32_t crc32(std::span<const std::uint8_t> bytes) {
             crc = (crc >> 1U) ^ ((crc & 1U) ? 0xedb88320U : 0U);
     }
     return ~crc;
+}
+
+std::vector<std::uint8_t> encode_state_block(const NdrStateBlock& state) {
+    std::vector<std::uint8_t> bytes; bytes.reserve(56);
+    append_le(bytes, state.object_id);
+    append_double(bytes, state.state.position_m.x); append_double(bytes, state.state.position_m.y); append_double(bytes, state.state.position_m.z);
+    append_double(bytes, state.state.velocity_m_s.x); append_double(bytes, state.state.velocity_m_s.y); append_double(bytes, state.state.velocity_m_s.z);
+    return bytes;
+}
+
+std::optional<NdrStateBlock> decode_state_block(std::span<const std::uint8_t> bytes) {
+    if (bytes.size()!=56) return std::nullopt;
+    NdrStateBlock result; std::size_t offset{};
+    if (!take_le(bytes,offset,result.object_id) || result.object_id==0 ||
+        !take_double(bytes,offset,result.state.position_m.x) || !take_double(bytes,offset,result.state.position_m.y) || !take_double(bytes,offset,result.state.position_m.z) ||
+        !take_double(bytes,offset,result.state.velocity_m_s.x) || !take_double(bytes,offset,result.state.velocity_m_s.y) || !take_double(bytes,offset,result.state.velocity_m_s.z)) return std::nullopt;
+    return result;
 }
 
 bool write_ndr(const std::filesystem::path& path, NdrHeader header,

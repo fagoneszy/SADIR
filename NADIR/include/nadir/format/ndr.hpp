@@ -5,6 +5,7 @@
 #include <optional>
 #include <span>
 #include <vector>
+#include <nadir/orbit/numerical.hpp>
 
 namespace nadir::format {
 
@@ -34,6 +35,17 @@ struct NdrRecord {
     bool operator==(const NdrRecord&) const = default;
 };
 
+struct NdrStateBlock {
+    std::uint64_t object_id{};
+    orbit::CartesianState state{};
+    bool operator==(const NdrStateBlock& rhs) const noexcept {
+        return object_id == rhs.object_id && state.position_m.x == rhs.state.position_m.x &&
+            state.position_m.y == rhs.state.position_m.y && state.position_m.z == rhs.state.position_m.z &&
+            state.velocity_m_s.x == rhs.state.velocity_m_s.x && state.velocity_m_s.y == rhs.state.velocity_m_s.y &&
+            state.velocity_m_s.z == rhs.state.velocity_m_s.z;
+    }
+};
+
 struct NdrFile {
     NdrHeader header;
     std::vector<NdrRecord> records;
@@ -52,6 +64,8 @@ private:
 };
 
 std::uint32_t crc32(std::span<const std::uint8_t> bytes);
+std::vector<std::uint8_t> encode_state_block(const NdrStateBlock& state);
+std::optional<NdrStateBlock> decode_state_block(std::span<const std::uint8_t> bytes);
 bool write_ndr(const std::filesystem::path& path, NdrHeader header,
                std::span<const NdrRecord> records);
 std::optional<NdrFile> read_ndr(const std::filesystem::path& path);
