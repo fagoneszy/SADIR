@@ -129,6 +129,7 @@ if(BUILD_TESTING)
     add_executable(nadir_frames_tests tests/test_frames.cpp)
     target_link_libraries(nadir_frames_tests PRIVATE nadir_core)
     add_test(NAME nadir_frames_tests COMMAND nadir_frames_tests)
+    set_tests_properties(nadir_frames_tests PROPERTIES LABELS science)
 
     add_executable(nadir_state_tests tests/test_state.cpp)
     target_link_libraries(nadir_state_tests PRIVATE nadir_state)
@@ -224,8 +225,8 @@ if(BUILD_TESTING)
     set_tests_properties(nadir_sgp4_verification PROPERTIES LABELS science)
 
     add_custom_target(science-gate
-        COMMAND ${CMAKE_CTEST_COMMAND} -R nadir_sgp4_verification --output-on-failure
-        DEPENDS nadir_sgp4_verification
-        COMMENT "Running science gate (SGP4 Vallado verification)"
+        COMMAND ${CMAKE_CTEST_COMMAND} -L science --output-on-failure
+        DEPENDS nadir_sgp4_verification nadir_frames_tests
+        COMMENT "Running science gate (Vallado SGP4 and TEME-to-ITRF verification)"
     )
 endif()
