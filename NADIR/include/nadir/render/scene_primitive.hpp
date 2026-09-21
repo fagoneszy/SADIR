@@ -14,6 +14,7 @@ struct ScenePoint {
     std::uint64_t entity_id{};
     math::Vec3d position{};
     float intensity{1.0f};
+    // Physical radius in metres. The renderer draws a depth-aware uncertainty halo.
     double radius{1.0};
 };
 

@@ -26,7 +26,7 @@ bool SceneSnapshot::valid() const {
     }
     for (const auto& point : points) {
         if (point.entity_id == 0 || !find_object(point.entity_id) || !finite(point.position) ||
-            !std::isfinite(point.intensity) || !std::isfinite(point.radius)) return false;
+            !std::isfinite(point.intensity) || !std::isfinite(point.radius) || point.radius < 0.0) return false;
     }
     for (const auto& polyline : polylines) {
         if (polyline.entity_id == 0 || !find_object(polyline.entity_id) || !std::isfinite(polyline.intensity)) return false;

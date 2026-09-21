@@ -19,6 +19,7 @@ target_link_libraries(nadir_state INTERFACE nadir_math nadir_units nadir_time na
 add_library(nadir_scene
     src/render/scene.cpp
     src/render/scene_builder.cpp
+    src/state/covariance.cpp
 )
 target_include_directories(nadir_scene PUBLIC include)
 target_link_libraries(nadir_scene PUBLIC nadir_state nadir_math)
@@ -88,7 +89,6 @@ add_library(nadir_core
     src/orbit/tracker.cpp
     third_party/vallado/SGP4.cpp
     src/math/quat.cpp
-    src/state/covariance.cpp
     src/space/body.cpp
     src/space/solar_catalog.cpp
     src/space/ephemeris_provider.cpp

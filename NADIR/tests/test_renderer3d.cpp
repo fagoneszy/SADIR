@@ -1,5 +1,7 @@
 #include <nadir/render/clip.hpp>
 #include <nadir/render/depth_buffer.hpp>
+#include <nadir/render/renderer3d.hpp>
+#include <nadir/render/scene_builder.hpp>
 
 #include <cmath>
 #include <limits>
@@ -26,5 +28,19 @@ int main() {
     if (render::clip_ndc({2.0, 2.0, 1.0, true}, {3.0, 3.0, 1.0, true}).visible) return 7;
     if (render::clip_ndc({0.0, 0.0, std::numeric_limits<double>::quiet_NaN(), true},
                          {0.5, 0.0, 1.0, true}).visible) return 8;
+    const time::TimeInstant epoch{0, 0};
+    const auto frame = frames::itrf2020();
+    const auto origin = state::earth_center();
+    render::SceneBuilder builder{epoch, frame, origin};
+    if (!builder.add_object({1, {{}, {}, epoch, frame, origin}, state::StateKind::Simulated,
+                             state::StateQuality::Nominal})) return 9;
+    builder.add_point({1, {}, 1.0f, 1.0});
+    render::Renderer3D renderer{100, 100};
+    render::Camera camera{};
+    if (!renderer.render(builder.build(), camera, {{}, 1.0}, 0.0)) return 10;
+    int illuminated{};
+    for (int y = 0; y < 100; ++y) for (int x = 0; x < 100; ++x)
+        if (renderer.phosphor().get(x, y) > 0.0f) ++illuminated;
+    if (illuminated < 40 || renderer.stats().points_visible != 1) return 11;
     return 0;
 }

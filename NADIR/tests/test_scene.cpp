@@ -44,5 +44,21 @@ int main() {
     auto nan_coordinate = snapshot;
     nan_coordinate.points[0].position.x = std::numeric_limits<double>::quiet_NaN();
     if (nan_coordinate.valid()) return 8;
+    auto negative_radius = snapshot;
+    negative_radius.points[0].radius = -1.0;
+    if (negative_radius.valid()) return 9;
+    auto uncertain = object;
+    uncertain.uncertainty.known = true;
+    uncertain.uncertainty.covariance.values[0] = 4.0;
+    uncertain.uncertainty.covariance.values[7] = 4.0;
+    uncertain.uncertainty.covariance.values[14] = 4.0;
+    uncertain.uncertainty.covariance.values[21] = 1.0;
+    uncertain.uncertainty.covariance.values[28] = 1.0;
+    uncertain.uncertainty.covariance.values[35] = 1.0;
+    render::SceneBuilder uncertainty_builder{epoch, frame, origin};
+    if (!uncertainty_builder.add_object(uncertain) || !uncertainty_builder.add_uncertainty_halo(1)) return 10;
+    const auto uncertainty_scene = uncertainty_builder.build();
+    if (uncertainty_scene.points.size() != 1 || std::abs(uncertainty_scene.points[0].radius - 6.0) > 1e-12) return 11;
+    if (uncertainty_builder.add_uncertainty_halo(99) || uncertainty_builder.add_uncertainty_halo(1, 0.0)) return 12;
     return 0;
 }

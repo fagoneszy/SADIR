@@ -72,6 +72,27 @@ bool Renderer3D::render(const SceneSnapshot& scene, const Camera& camera,
         ++stats_.segments_visible;
         if (ndc.clipped) ++stats_.segments_clipped;
     };
+    const auto draw_halo = [&](const ScreenPoint& center, double radius_m, float intensity) {
+        if (radius_m <= 0.0 || transform.meters_per_render_unit <= 0.0) return;
+        constexpr double pi = 3.14159265358979323846;
+        const double focal_pixels = phosphor_.height() /
+            (2.0 * std::tan(camera.fov_deg * pi / 360.0));
+        const double radius_pixels = radius_m / transform.meters_per_render_unit * focal_pixels / center.depth;
+        if (!std::isfinite(radius_pixels) || radius_pixels < 1.0) return;
+        const int maximum_radius = 2 * std::max(phosphor_.width(), phosphor_.height());
+        const int radius = std::clamp(static_cast<int>(std::lround(radius_pixels)), 1, maximum_radius);
+        const int samples = std::clamp(static_cast<int>(std::ceil(2.0 * pi * radius)), 12, 4096);
+        for (int sample = 0; sample < samples; ++sample) {
+            const double angle = 2.0 * pi * sample / samples;
+            const int x = static_cast<int>(std::lround(center.x + radius * std::cos(angle)));
+            const int y = static_cast<int>(std::lround(center.y + radius * std::sin(angle)));
+            ++stats_.depth_tests;
+            if (center.depth <= depth_.get(x, y)) {
+                ++stats_.depth_passes;
+                phosphor_.inject(x, y, 0.35f * intensity);
+            }
+        }
+    };
 
     for (const auto& point : scene.points) {
         ++stats_.points_submitted;
@@ -83,6 +104,7 @@ bool Renderer3D::render(const SceneSnapshot& scene, const Camera& camera,
         ++stats_.depth_tests;
         if (depth_.test_and_write(static_cast<int>(std::lround(screen.x)), static_cast<int>(std::lround(screen.y)), projected.depth)) {
             phosphor_.inject(static_cast<int>(std::lround(screen.x)), static_cast<int>(std::lround(screen.y)), point.intensity);
+            draw_halo(screen, point.radius, point.intensity);
             ++stats_.depth_passes;
             ++stats_.points_visible;
         }

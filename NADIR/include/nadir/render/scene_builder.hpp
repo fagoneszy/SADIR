@@ -13,6 +13,9 @@ public:
 
     bool add_object(const state::TrackedState& state);
     void add_point(ScenePoint point);
+    // Adds a physical-position uncertainty halo for an object with valid covariance.
+    bool add_uncertainty_halo(std::uint64_t entity_id, double sigma_multiplier = 3.0,
+                              float intensity = 1.0f);
     void add_polyline(ScenePolyline polyline);
     void add_label(SceneLabel label);
     [[nodiscard]] SceneSnapshot build() const;
