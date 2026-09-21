@@ -75,6 +75,7 @@ add_library(nadir_core
     src/orbit/sgp4.cpp
     src/orbit/batch.cpp
     src/orbit/snapshot_buffer.cpp
+    src/orbit/conjunction.cpp
     src/orbit/sgp4_init.cpp
     src/orbit/sgp4_deep.cpp
     src/orbit/pass_predictor.cpp
@@ -196,6 +197,10 @@ if(BUILD_TESTING)
     add_executable(nadir_covariance_tests tests/test_covariance.cpp)
     target_link_libraries(nadir_covariance_tests PRIVATE nadir_core)
     add_test(NAME nadir_covariance_tests COMMAND nadir_covariance_tests)
+
+    add_executable(nadir_conjunction_tests tests/test_conjunction.cpp)
+    target_link_libraries(nadir_conjunction_tests PRIVATE nadir_core)
+    add_test(NAME nadir_conjunction_tests COMMAND nadir_conjunction_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
