@@ -116,7 +116,7 @@ if(BUILD_TESTING)
     add_test(NAME nadir_time_tests COMMAND nadir_time_tests)
 
     add_executable(nadir_frames_tests tests/test_frames.cpp)
-    target_link_libraries(nadir_frames_tests PRIVATE nadir_frames)
+    target_link_libraries(nadir_frames_tests PRIVATE nadir_core)
     add_test(NAME nadir_frames_tests COMMAND nadir_frames_tests)
 
     add_executable(nadir_state_tests tests/test_state.cpp)
@@ -162,6 +162,10 @@ if(BUILD_TESTING)
     add_executable(nadir_sun_tests tests/test_sun.cpp)
     target_link_libraries(nadir_sun_tests PRIVATE nadir_core)
     add_test(NAME nadir_sun_tests COMMAND nadir_sun_tests)
+
+    add_executable(nadir_eop_tests tests/test_eop.cpp)
+    target_link_libraries(nadir_eop_tests PRIVATE nadir_core)
+    add_test(NAME nadir_eop_tests COMMAND nadir_eop_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)

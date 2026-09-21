@@ -1,4 +1,7 @@
 #include <nadir/frames/orbit_adapter.hpp>
+#include <nadir/geo/frames.hpp>
+
+#include <cmath>
 
 using namespace nadir;
 
@@ -25,6 +28,9 @@ int main() {
     if (orbit::to_reference_frame(orbit::Frame::ITRF) != itrf2020()) return 7;
     if (orbit::to_reference_frame(orbit::Frame::Unknown).valid()) return 8;
     if (orbit::to_reference_frame(orbit::Frame::ENU).valid()) return 9;
+
+    // Vallado 4th ed., GMST regression epoch (radians).
+    if (std::abs(geo::gmst_vallado(2448855.009722) - 2.66300082) > 1.0e-7) return 10;
 
     return 0;
 }

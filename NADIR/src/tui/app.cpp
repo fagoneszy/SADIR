@@ -483,7 +483,8 @@ int App::orbit(const std::vector<std::string>& args) {
         if (const auto eop_path=store.latest("iers.eop.rapid")) {
             if (const auto table=geo::load_iers_csv(*eop_path)) {
                 const auto now=core::now_utc();
-                if (const auto current=geo::interpolate_eop(*table,now.mjd_utc)) { eop=*current; eop_quality=eop.prediction?"IERS PREDICTED":"IERS OBSERVED/RAPID"; }
+                const auto current=geo::resolve_eop(*table,now.mjd_utc);
+                if (current) { eop=current.record; eop_quality=eop.prediction?"IERS PREDICTED":"IERS OBSERVED/RAPID"; }
             }
         }
         const auto now=core::now_utc(eop.dut1_s);

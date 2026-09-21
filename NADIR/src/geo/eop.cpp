@@ -146,4 +146,12 @@ std::optional<EopRecord> interpolate_eop(const EopTable& table,double mjd) {
     return r;
 }
 
+EopResolution resolve_eop(const EopTable& table,double mjd) {
+    if (table.records.empty() || !std::isfinite(mjd) || mjd < table.records.front().mjd || mjd > table.records.back().mjd) return {};
+    const auto record = interpolate_eop(table, mjd);
+    if (!record) return {};
+    const auto availability = record->prediction ? EopAvailability::Predicted : EopAvailability::Observed;
+    return {*record, availability, 0.0};
+}
+
 }
