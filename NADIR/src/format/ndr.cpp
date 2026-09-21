@@ -66,12 +66,17 @@ std::uint32_t crc32(std::span<const std::uint8_t> bytes) {
 bool write_ndr(const std::filesystem::path& path, NdrHeader header,
                std::span<const NdrRecord> records) {
     std::vector<std::uint8_t> encoded;
+    std::uint64_t previous_timestamp{};
+    bool first = true;
     for (const auto& record : records) {
+        if (!first && record.timestamp_ns < previous_timestamp) return false;
         if (record.payload.size() > max_payload_bytes) return false;
         append_le(encoded, record.type);
         append_le(encoded, record.timestamp_ns);
         append_le(encoded, static_cast<std::uint32_t>(record.payload.size()));
         encoded.insert(encoded.end(), record.payload.begin(), record.payload.end());
+        previous_timestamp = record.timestamp_ns;
+        first = false;
     }
     header.magic = {'N','A','D','I','R',0,0,2};
     header.version = 2;
@@ -117,6 +122,18 @@ std::optional<NdrFile> read_ndr(const std::filesystem::path& path) {
     if (offset != bytes.size()) return std::nullopt;
     return result;
 }
+
+NdrReplay::NdrReplay(NdrFile file) : file_(std::move(file)) {}
+
+const NdrFile& NdrReplay::file() const noexcept { return file_; }
+
+const NdrRecord* NdrReplay::seek(std::uint64_t timestamp_ns) const noexcept {
+    const auto it = std::upper_bound(file_.records.begin(), file_.records.end(), timestamp_ns,
+        [](std::uint64_t value, const NdrRecord& record) { return value < record.timestamp_ns; });
+    return it == file_.records.begin() ? nullptr : &*std::prev(it);
+}
+
+std::span<const NdrRecord> NdrReplay::records() const noexcept { return file_.records; }
 
 bool write_header(const std::filesystem::path& path, const NdrHeader& header) {
     return write_ndr(path, header, {});
