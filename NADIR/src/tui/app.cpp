@@ -16,6 +16,7 @@
 #include <nadir/earth/space_weather.hpp>
 #include <nadir/format/ndr.hpp>
 #include <nadir/geo/eop.hpp>
+#include <nadir/geo/station.hpp>
 #include <nadir/geo/wgs84.hpp>
 #include <nadir/orbit/pass_predictor.hpp>
 #include <nadir/orbit/tracker.hpp>
@@ -684,6 +685,25 @@ int App::fireballs(const std::vector<std::string>& args) {
 }
 
 int App::station(const std::vector<std::string>& args) {
+    if (args.size() >= 3 && (args[1] == "catalog" || args[1] == "info")) {
+        const auto stations = geo::load_ground_stations_tsv(args[2]);
+        if (!stations) { std::cout << "STATION CATALOG LOAD FAILED\n"; return 1; }
+        if (args[1] == "catalog") {
+            if (args.size() != 3) { std::cout << "station catalog <tsv>\n"; return 1; }
+            std::cout << "STATIONS " << stations->size() << "\n";
+            for (const auto& station : *stations)
+                std::cout << station.id << "\t" << station.name << "\t" << station.location.latitude_deg << "\t"
+                          << station.location.longitude_deg << "\t" << station.location.altitude_m << "\n";
+            return 0;
+        }
+        if (args.size() != 4) { std::cout << "station info <tsv> <id>\n"; return 1; }
+        const auto* selected = geo::find_ground_station(*stations, args[3]);
+        if (!selected) { std::cout << "STATION NOT FOUND\n"; return 1; }
+        std::cout << "ID " << selected->id << "\nNAME " << selected->name << "\nLAT " << selected->location.latitude_deg
+                  << "\nLON " << selected->location.longitude_deg << "\nALT " << selected->location.altitude_m
+                  << "\nMASK " << selected->elevation_mask_deg << "\nSOURCE " << selected->source << "\n";
+        return 0;
+    }
     if (args.size()>1 && args[1]=="interfaces") {
         const auto ifs=system::interface_addresses();
         for (const auto& i:ifs) std::cout<<std::left<<std::setw(18)<<i.name<<std::setw(6)<<i.family<<std::setw(8)<<(i.up?"UP":"DOWN")<<std::setw(6)<<(i.loopback?"LOOP":"")<<i.address<<"\n";
@@ -745,6 +765,7 @@ void App::help() const {
     std::cout<<"fireballs [limit]\n";
     std::cout<<"craft <family> <generation>\n";
     std::cout<<"station [interfaces]\n";
+    std::cout<<"station catalog <tsv>\nstation info <tsv> <id>\n";
     std::cout<<"universe\n";
     std::cout<<"tle <name> <line1> <line2>\n";
     std::cout<<"clear\nexit\n";

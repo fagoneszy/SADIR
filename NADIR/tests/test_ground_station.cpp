@@ -1,7 +1,10 @@
 #include <nadir/geo/station.hpp>
+#include <nadir/tui/app.hpp>
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 
 int main() {
     const auto path = std::filesystem::temp_directory_path() / "nadir-ground-stations.tsv";
@@ -12,8 +15,15 @@ int main() {
     out << "BAD\tBad\t95\t0\t0\t0\tfixture\n";
     out.close();
     const auto stations = nadir::geo::load_ground_stations_tsv(path.string());
-    std::filesystem::remove(path);
     if (!stations || stations->size() != 1) return 1;
     const auto* station = nadir::geo::find_ground_station(*stations, "BR-TEST");
-    return !station || station->elevation_mask_deg != 10.0 || station->location.altitude_m != 850.0 ? 2 : 0;
+    if (!station || station->elevation_mask_deg != 10.0 || station->location.altitude_m != 850.0) return 2;
+    std::ostringstream console;
+    auto* const previous_console = std::cout.rdbuf(console.rdbuf());
+    const int catalog_status = nadir::tui::App{}.run({"station", "catalog", path.string()});
+    const int info_status = nadir::tui::App{}.run({"station", "info", path.string(), "BR-TEST"});
+    std::cout.rdbuf(previous_console);
+    std::filesystem::remove(path);
+    return catalog_status != 0 || info_status != 0 || console.str().find("STATIONS 1") == std::string::npos ||
+        console.str().find("MASK 10") == std::string::npos ? 3 : 0;
 }

@@ -17,7 +17,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 22–23 covariance/conjunction | foundation | covariance transforms and deterministic screening; PSD/Pc and spatial broadphase are open. |
 | 24 CCSDS | foundation | OMM, OPM KVN, single-segment OEM KVN and CDM conjunction-summary KVN; OCM/TDM and broader profiles remain open. |
 | 25–27 NDR/clock/replay | foundation | checksummed chronological NDR and deterministic clock; typed source provenance and Cartesian-state blocks exist, while additional schemas and UI replay are open. |
-| 28–29 maps/stations | foundation | geodetic station catalog parser; Natural Earth data/rendering and station UI are open. |
+| 28–29 maps/stations | foundation | geodetic station catalog parser and TSV catalog/info console commands; Natural Earth data/rendering and a sourced public station catalog remain open. |
 | 30–32 GNSS/ILRS | open | SP3/CLK/SSR, RINEX, CPF/CRD and validation fixtures absent. |
 | 33 numerical propagation | foundation | central, J2, third-body RK4; adaptive high-order, SRP and drag remain open. |
 | 34–37 EGM2008/atmosphere/weather/WMM | open | no validated model/data ingest. |
