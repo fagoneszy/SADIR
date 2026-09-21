@@ -24,7 +24,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 38–41 DE/SPICE/solar system/small bodies | foundation | Horizons provider and body data; local DE/SPICE and validated display path open. |
 | 42 spacecraft geometry | foundation | OBJ only; STL/GLB provenance binding open. |
 | 43–46 Gaia/4D/network/geospatial layers | open | no implementation sufficient for roadmap scope. |
-| 47 fuzzing | foundation | deterministic mutation sweep covers OPM; libFuzzer campaigns and remaining parsers are open. |
+| 47 fuzzing | foundation | deterministic mutation sweeps cover OPM, OEM and CDM; libFuzzer campaigns and remaining parsers are open. |
 | 48 ingestion security | foundation | cache hashes and OPM limits; global limits/TLS policy/content validation open. |
 | 49 benchmarks | open | no reproducible benchmark suite. |
 | 50 science gate | foundation | Vallado SGP4 + TEME/ITRF oracle; wider science suite open. |

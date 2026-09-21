@@ -1,5 +1,6 @@
 #include <nadir/astro/oem.hpp>
 
+#include <cstdint>
 #include <string>
 
 int main() {
@@ -22,5 +23,17 @@ DATA_STOP
     if (!round_trip.ok || !round_trip.record || round_trip.record->samples != parsed.record->samples) return 2;
     if (nadir::astro::parse_oem_kvn("CCSDS_OEM_VERS = 2.0").ok ||
         nadir::astro::parse_oem_kvn(std::string(1024U * 1024U + 1U, 'x')).ok) return 3;
+    std::uint32_t random = 0x7f4a7c15U;
+    for (int sample = 0; sample < 512; ++sample) {
+        const int length = static_cast<int>(random % 512U);
+        random = random * 1664525U + 1013904223U;
+        std::string fuzz;
+        fuzz.reserve(length);
+        for (int index = 0; index < length; ++index) {
+            random = random * 1664525U + 1013904223U;
+            fuzz.push_back(static_cast<char>(random >> 24U));
+        }
+        (void)nadir::astro::parse_oem_kvn(fuzz);
+    }
     return 0;
 }

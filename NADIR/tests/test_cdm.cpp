@@ -1,6 +1,7 @@
 #include <nadir/astro/cdm.hpp>
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 
 int main() {
@@ -18,5 +19,17 @@ OBJECT2_OBJECT_DESIGNATOR = 99999
     if (nadir::astro::parse_cdm_kvn("CCSDS_CDM_VERS = 1.0").ok ||
         nadir::astro::parse_cdm_kvn("CCSDS_CDM_VERS = 1.0\nTCA = x\nOBJECT1_OBJECT_DESIGNATOR = 1\nOBJECT2_OBJECT_DESIGNATOR = 2\nMISS_DISTANCE = -1\nRELATIVE_SPEED = 1").ok ||
         nadir::astro::parse_cdm_kvn(std::string(1024U * 1024U + 1U, 'x')).ok) return 2;
+    std::uint32_t random = 0x4c957f2dU;
+    for (int sample = 0; sample < 512; ++sample) {
+        const int length = static_cast<int>(random % 512U);
+        random = random * 1664525U + 1013904223U;
+        std::string fuzz;
+        fuzz.reserve(length);
+        for (int index = 0; index < length; ++index) {
+            random = random * 1664525U + 1013904223U;
+            fuzz.push_back(static_cast<char>(random >> 24U));
+        }
+        (void)nadir::astro::parse_cdm_kvn(fuzz);
+    }
     return 0;
 }
