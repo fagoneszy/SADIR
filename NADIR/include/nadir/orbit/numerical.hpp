@@ -23,6 +23,13 @@ struct ThirdBody {
     double mu_m3_s2{};
 };
 
+struct IntegratorSettings {
+    double initial_step_s{60.0};
+    double minimum_step_s{0.01};
+    double maximum_step_s{300.0};
+    double position_tolerance_m{1.0};
+};
+
 // Earth-centered inertial acceleration: central gravity plus optional J2.
 math::Vec3d gravity_acceleration(const math::Vec3d& position_m, const GravityModel& model = {},
                                  std::span<const ThirdBody> third_bodies = {});
@@ -32,5 +39,9 @@ math::Vec3d gravity_acceleration(const math::Vec3d& position_m, const GravityMod
 std::optional<CartesianState> propagate_numerical(CartesianState initial, double duration_s,
                                                    double step_s, const GravityModel& model = {},
                                                    std::span<const ThirdBody> third_bodies = {});
+
+std::optional<CartesianState> propagate_numerical_adaptive(CartesianState initial, double duration_s,
+                                                            IntegratorSettings settings = {}, const GravityModel& model = {},
+                                                            std::span<const ThirdBody> third_bodies = {});
 
 } // namespace nadir::orbit

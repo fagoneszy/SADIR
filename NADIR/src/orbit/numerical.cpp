@@ -15,6 +15,15 @@ CartesianState derivative(const CartesianState& state, const GravityModel& model
 CartesianState add_scaled(const CartesianState& state, const CartesianState& slope, double scale) {
     return {state.position_m + slope.position_m * scale, state.velocity_m_s + slope.velocity_m_s * scale};
 }
+CartesianState rk4_step(CartesianState state, double h, const GravityModel& model, std::span<const ThirdBody> bodies) {
+    const auto k1 = derivative(state, model, bodies);
+    const auto k2 = derivative(add_scaled(state, k1, h * 0.5), model, bodies);
+    const auto k3 = derivative(add_scaled(state, k2, h * 0.5), model, bodies);
+    const auto k4 = derivative(add_scaled(state, k3, h), model, bodies);
+    state.position_m = state.position_m + (k1.position_m + 2.0*k2.position_m + 2.0*k3.position_m + k4.position_m) * (h/6.0);
+    state.velocity_m_s = state.velocity_m_s + (k1.velocity_m_s + 2.0*k2.velocity_m_s + 2.0*k3.velocity_m_s + k4.velocity_m_s) * (h/6.0);
+    return state;
+}
 } // namespace
 
 math::Vec3d gravity_acceleration(const math::Vec3d& r, const GravityModel& model, std::span<const ThirdBody> third_bodies) {
@@ -45,14 +54,33 @@ std::optional<CartesianState> propagate_numerical(CartesianState state, double d
     double remaining = std::abs(duration_s);
     while (remaining > 0.0) {
         const double h = direction * std::min(step_s, remaining);
-        const auto k1 = derivative(state, model, third_bodies);
-        const auto k2 = derivative(add_scaled(state, k1, h * 0.5), model, third_bodies);
-        const auto k3 = derivative(add_scaled(state, k2, h * 0.5), model, third_bodies);
-        const auto k4 = derivative(add_scaled(state, k3, h), model, third_bodies);
-        state.position_m = state.position_m + (k1.position_m + 2.0 * k2.position_m + 2.0 * k3.position_m + k4.position_m) * (h / 6.0);
-        state.velocity_m_s = state.velocity_m_s + (k1.velocity_m_s + 2.0 * k2.velocity_m_s + 2.0 * k3.velocity_m_s + k4.velocity_m_s) * (h / 6.0);
+        state = rk4_step(state, h, model, third_bodies);
         if (!std::isfinite(state.position_m.x) || !std::isfinite(state.position_m.y) || !std::isfinite(state.position_m.z)) return std::nullopt;
         remaining -= std::abs(h);
+    }
+    return state;
+}
+
+std::optional<CartesianState> propagate_numerical_adaptive(CartesianState state, double duration_s,
+                                                            IntegratorSettings settings, const GravityModel& model,
+                                                            std::span<const ThirdBody> third_bodies) {
+    if (!valid_model(model) || !std::isfinite(duration_s) || !std::isfinite(settings.initial_step_s) ||
+        settings.minimum_step_s <= 0.0 || settings.maximum_step_s < settings.minimum_step_s ||
+        settings.position_tolerance_m <= 0.0) return std::nullopt;
+    const double direction=duration_s < 0.0 ? -1.0 : 1.0;
+    double remaining=std::abs(duration_s);
+    double step=std::clamp(settings.initial_step_s, settings.minimum_step_s, settings.maximum_step_s);
+    while (remaining > 0.0) {
+        const double magnitude=std::min(step, remaining);
+        const double h=direction*magnitude;
+        const auto full=rk4_step(state,h,model,third_bodies);
+        const auto half=rk4_step(rk4_step(state,h*0.5,model,third_bodies),h*0.5,model,third_bodies);
+        const double error=(half.position_m-full.position_m).norm()/15.0;
+        if (!std::isfinite(error)) return std::nullopt;
+        if (error <= settings.position_tolerance_m || magnitude <= settings.minimum_step_s) {
+            state=half; remaining-=magnitude;
+            step=std::min(settings.maximum_step_s, magnitude*(error <= 1e-15 ? 2.0 : std::clamp(0.9*std::pow(settings.position_tolerance_m/error,0.2),1.1,2.0)));
+        } else step=std::max(settings.minimum_step_s, magnitude*std::clamp(0.9*std::pow(settings.position_tolerance_m/error,0.2),0.1,0.8));
     }
     return state;
 }
