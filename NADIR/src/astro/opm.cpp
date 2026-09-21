@@ -8,6 +8,8 @@
 
 namespace nadir::astro {
 namespace {
+constexpr std::size_t maximum_message_bytes = 1024U * 1024U;
+constexpr std::size_t maximum_lines = 4096U;
 std::string trim(std::string value) {
     const auto first = value.find_first_not_of(" \t\r");
     const auto last = value.find_last_not_of(" \t\r");
@@ -24,9 +26,12 @@ std::optional<double> number(const std::map<std::string, std::string>& fields, c
 } // namespace
 
 OpmParseResult parse_opm_kvn(const std::string& text) {
+    if (text.size() > maximum_message_bytes) return {false, {}, "OPM message exceeds size limit"};
     std::map<std::string, std::string> fields;
     std::istringstream input(text);
+    std::size_t line_count{};
     for (std::string line; std::getline(input, line); ) {
+        if (++line_count > maximum_lines) return {false, {}, "OPM message has too many lines"};
         const auto equals = line.find('=');
         if (equals == std::string::npos) continue;
         auto key = trim(line.substr(0, equals));
