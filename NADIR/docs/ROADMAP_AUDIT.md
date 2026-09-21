@@ -15,7 +15,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 17–19 catalog/performance/SoA | foundation | aliases, batches and snapshot buffer exist; worker pool and large-catalog benchmark are open. |
 | 20–21 LOD/quality | foundation | renderer LOD and inspector freshness labels; uncertainty visualization is open. |
 | 22–23 covariance/conjunction | foundation | covariance transforms and deterministic screening; PSD/Pc and spatial broadphase are open. |
-| 24 CCSDS | foundation | OMM, OPM KVN and single-segment OEM KVN; OCM/CDM/TDM and broader OEM profiles remain open. |
+| 24 CCSDS | foundation | OMM, OPM KVN, single-segment OEM KVN and CDM conjunction-summary KVN; OCM/TDM and broader profiles remain open. |
 | 25–27 NDR/clock/replay | foundation | checksummed chronological NDR and deterministic clock; typed source provenance and Cartesian-state blocks exist, while additional schemas and UI replay are open. |
 | 28–29 maps/stations | foundation | geodetic station catalog parser; Natural Earth data/rendering and station UI are open. |
 | 30–32 GNSS/ILRS | open | SP3/CLK/SSR, RINEX, CPF/CRD and validation fixtures absent. |
