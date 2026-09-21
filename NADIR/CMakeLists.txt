@@ -76,6 +76,7 @@ add_library(nadir_core
     src/orbit/pass_predictor.cpp
     src/orbit/eclipse.cpp
     src/orbit/ground_track.cpp
+    src/orbit/scene_adapter.cpp
     src/orbit/tracker.cpp
     third_party/vallado/SGP4.cpp
     src/math/quat.cpp
@@ -166,6 +167,10 @@ if(BUILD_TESTING)
     add_executable(nadir_eop_tests tests/test_eop.cpp)
     target_link_libraries(nadir_eop_tests PRIVATE nadir_core)
     add_test(NAME nadir_eop_tests COMMAND nadir_eop_tests)
+
+    add_executable(nadir_scene_adapter_tests tests/test_scene_adapter.cpp)
+    target_link_libraries(nadir_scene_adapter_tests PRIVATE nadir_core)
+    add_test(NAME nadir_scene_adapter_tests COMMAND nadir_scene_adapter_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
