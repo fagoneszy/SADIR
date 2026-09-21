@@ -11,5 +11,8 @@ int main() {
     if (!sigma || std::abs(*sigma-4.0)>1e-12) return 2;
     const auto rotated=nadir::state::rotate_covariance(covariance,{0,-1,0,1,0,0,0,0,1});
     if (std::abs(rotated.values[0]-9.0)>1e-12 || std::abs(rotated.values[7]-4.0)>1e-12) return 3;
-    covariance.values[1]=1.0; return nadir::state::valid_covariance(covariance)?4:0;
+    covariance.values[1]=1.0; if (nadir::state::valid_covariance(covariance)) return 4;
+    covariance.values[1]=0.0; covariance.values[6]=0.0;
+    covariance.values[0]=1.0; covariance.values[7]=1.0; covariance.values[1]=2.0; covariance.values[6]=2.0;
+    return nadir::state::valid_covariance(covariance) ? 5 : 0;
 }

@@ -14,6 +14,25 @@ bool valid_covariance(const Covariance6& covariance, double tolerance) noexcept 
             if (!std::isfinite(a) || !std::isfinite(b) || std::abs(a - b) > tolerance) return false;
         }
     }
+    // Symmetry and non-negative diagonal alone do not make a covariance
+    // physically valid. LDL^T detects negative eigenvalues without requiring
+    // a general eigenvalue solver, while accepting semidefinite matrices.
+    double lower[36]{};
+    double diagonal[6]{};
+    for (int k = 0; k < 6; ++k) {
+        double value = covariance.values[k * 6 + k];
+        for (int j = 0; j < k; ++j) value -= lower[k * 6 + j] * lower[k * 6 + j] * diagonal[j];
+        if (value < -tolerance) return false;
+        diagonal[k] = std::max(0.0, value);
+        lower[k * 6 + k] = 1.0;
+        for (int row = k + 1; row < 6; ++row) {
+            double cross = covariance.values[row * 6 + k];
+            for (int j = 0; j < k; ++j) cross -= lower[row * 6 + j] * lower[k * 6 + j] * diagonal[j];
+            if (diagonal[k] <= tolerance) {
+                if (std::abs(cross) > tolerance) return false;
+            } else lower[row * 6 + k] = cross / diagonal[k];
+        }
+    }
     return true;
 }
 
