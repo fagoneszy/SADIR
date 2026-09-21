@@ -119,6 +119,30 @@ std::optional<NdrSourceBlock> decode_source_block(std::span<const std::uint8_t> 
     return result;
 }
 
+std::vector<std::uint8_t> encode_object_block(const NdrObjectBlock& object) {
+    if (object.object_id == 0 || object.name.empty() || object.name.size() > max_source_id_bytes) return {};
+    std::vector<std::uint8_t> bytes;
+    bytes.reserve(sizeof(object.object_id) + sizeof(object.catalog_id) + sizeof(std::uint16_t) + object.name.size());
+    for (const auto character : object.name) if (static_cast<unsigned char>(character) < 0x20U) return {};
+    append_le(bytes, object.object_id);
+    append_le(bytes, object.catalog_id);
+    append_le(bytes, static_cast<std::uint16_t>(object.name.size()));
+    bytes.insert(bytes.end(), object.name.begin(), object.name.end());
+    return bytes;
+}
+
+std::optional<NdrObjectBlock> decode_object_block(std::span<const std::uint8_t> bytes) {
+    NdrObjectBlock result;
+    std::size_t offset{};
+    std::uint16_t name_size{};
+    if (!take_le(bytes, offset, result.object_id) || !take_le(bytes, offset, result.catalog_id) ||
+        !take_le(bytes, offset, name_size) || result.object_id == 0 || name_size == 0 || name_size > max_source_id_bytes ||
+        bytes.size() != sizeof(result.object_id) + sizeof(result.catalog_id) + sizeof(name_size) + name_size) return std::nullopt;
+    result.name.assign(reinterpret_cast<const char*>(bytes.data() + offset), name_size);
+    for (const auto character : result.name) if (static_cast<unsigned char>(character) < 0x20U) return std::nullopt;
+    return result;
+}
+
 std::vector<std::uint8_t> encode_state_block(const NdrStateBlock& state) {
     std::vector<std::uint8_t> bytes; bytes.reserve(56);
     append_le(bytes, state.object_id);

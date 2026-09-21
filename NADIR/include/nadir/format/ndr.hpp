@@ -59,6 +59,14 @@ struct NdrSourceBlock {
     bool operator==(const NdrSourceBlock&) const = default;
 };
 
+// Stable object identity used by State and Event records in the same stream.
+struct NdrObjectBlock {
+    std::uint64_t object_id{};
+    std::uint64_t catalog_id{};
+    std::string name;
+    bool operator==(const NdrObjectBlock&) const = default;
+};
+
 struct NdrFile {
     NdrHeader header;
     std::vector<NdrRecord> records;
@@ -79,6 +87,8 @@ private:
 std::uint32_t crc32(std::span<const std::uint8_t> bytes);
 std::vector<std::uint8_t> encode_source_block(const NdrSourceBlock& source);
 std::optional<NdrSourceBlock> decode_source_block(std::span<const std::uint8_t> bytes);
+std::vector<std::uint8_t> encode_object_block(const NdrObjectBlock& object);
+std::optional<NdrObjectBlock> decode_object_block(std::span<const std::uint8_t> bytes);
 std::vector<std::uint8_t> encode_state_block(const NdrStateBlock& state);
 std::optional<NdrStateBlock> decode_state_block(std::span<const std::uint8_t> bytes);
 bool write_ndr(const std::filesystem::path& path, NdrHeader header,

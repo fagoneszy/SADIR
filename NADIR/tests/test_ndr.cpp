@@ -13,20 +13,25 @@ int main() {
     const nadir::format::NdrSourceBlock source{"celestrak-gp", "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", 1234};
     const auto decoded_source = nadir::format::decode_source_block(nadir::format::encode_source_block(source));
     if (!decoded_source || *decoded_source != source) return 6;
+    const nadir::format::NdrObjectBlock object{42, 25544, "ISS (ZARYA)"};
+    const auto decoded_object = nadir::format::decode_object_block(nadir::format::encode_object_block(object));
+    if (!decoded_object || *decoded_object != object) return 10;
     auto malformed_source = source;
     malformed_source.sha256[0] = 'G';
     const std::array<std::uint8_t, 2> empty_source{0, 0};
     if (!nadir::format::encode_source_block(malformed_source).empty() ||
-        nadir::format::decode_source_block(empty_source)) return 7;
+        nadir::format::decode_source_block(empty_source) ||
+        !nadir::format::encode_object_block({0, 25544, "invalid"}).empty()) return 7;
     const std::vector<nadir::format::NdrRecord> records{
         {static_cast<std::uint16_t>(nadir::format::NdrRecordType::Source), 100, nadir::format::encode_source_block(source)},
+        {static_cast<std::uint16_t>(nadir::format::NdrRecordType::Object), 150, nadir::format::encode_object_block(object)},
         {static_cast<std::uint16_t>(nadir::format::NdrRecordType::State), 200, nadir::format::encode_state_block(state)},
     };
     if (!nadir::format::write_ndr(path, {.type = 7, .timestamp_ns = 42}, records)) return 1;
     const auto read = nadir::format::read_ndr(path);
     if (!read || read->header.type != 7 || read->header.timestamp_ns != 42 || read->records != records) return 2;
     const nadir::format::NdrReplay replay(*read);
-    if (replay.seek(99) || !replay.seek(100) || replay.seek(150)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::Source) ||
+    if (replay.seek(99) || !replay.seek(100) || replay.seek(150)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::Object) ||
         replay.seek(999)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::State)) return 3;
     std::fstream oversized_count(path, std::ios::in | std::ios::out | std::ios::binary);
     oversized_count.seekp(20, std::ios::beg); // record_count in the fixed NDR v2 header
