@@ -20,15 +20,20 @@ std::optional<CachedObject> CacheStore::store(const Source& source,const std::st
     const auto dir=std::filesystem::path(root_)/safe(source.id);
     std::filesystem::create_directories(dir);
     const auto ext=source.format.empty()?"bin":source.format;
-    const auto base=core::compact_utc(now.unix_ns);
+    const auto base=core::compact_utc(now.unix_ns)+"-"+std::to_string(now.unix_ns % 1000000000LL);
     const auto data_path=dir/(base+"."+ext);
     const auto meta_path=dir/(base+".meta");
-    std::ofstream data(data_path,std::ios::binary);
+    const auto data_partial=data_path.string()+".partial";
+    const auto meta_partial=meta_path.string()+".partial";
+    std::ofstream data(data_partial,std::ios::binary|std::ios::trunc);
     if (!data) return std::nullopt;
     data.write(body.data(),static_cast<std::streamsize>(body.size()));
     data.close();
+    std::error_code error;
+    std::filesystem::rename(data_partial,data_path,error);
+    if (error) { std::filesystem::remove(data_partial); return std::nullopt; }
     const auto digest=core::sha256(body);
-    std::ofstream meta(meta_path);
+    std::ofstream meta(meta_partial,std::ios::trunc);
     if (!meta) return std::nullopt;
     meta<<"source="<<source.id<<"\n";
     meta<<"domain="<<source.domain<<"\n";
@@ -43,8 +48,20 @@ std::optional<CachedObject> CacheStore::store(const Source& source,const std::st
     meta<<"sha256="<<digest<<"\n";
     meta<<"url="<<source.url<<"\n";
     meta.close();
-    std::ofstream latest(dir/"LATEST",std::ios::trunc);
+    std::filesystem::rename(meta_partial,meta_path,error);
+    if (error) { std::filesystem::remove(meta_partial); return std::nullopt; }
+    const auto latest_partial=(dir/"LATEST.partial");
+    std::ofstream latest(latest_partial,std::ios::trunc);
+    if (!latest) return std::nullopt;
     latest<<data_path.filename().string();
+    latest.close();
+    std::filesystem::rename(latest_partial,dir/"LATEST",error);
+    if (error) {
+        std::filesystem::remove(dir/"LATEST",error);
+        error.clear();
+        std::filesystem::rename(latest_partial,dir/"LATEST",error);
+        if (error) { std::filesystem::remove(latest_partial); return std::nullopt; }
+    }
     return CachedObject{data_path.string(),meta_path.string(),digest,static_cast<std::uint64_t>(body.size())};
 }
 
@@ -77,10 +94,20 @@ std::optional<CacheInfo> CacheStore::info(const std::string& source_id) const {
     out.meta_path=meta_path.string();
     out.sha256=kv["sha256"];
     out.url=kv["url"];
+    out.format=kv["format"];
+    out.license=kv["license"];
     try { out.fetched_unix_ns=std::stoll(kv["fetched_unix_ns"]); } catch (...) {}
     try { out.bytes=static_cast<std::uint64_t>(std::stoull(kv["bytes"])); } catch (...) {}
     try { out.http_status=std::stol(kv["http_status"]); } catch (...) {}
     return out;
+}
+
+bool CacheStore::verify(const std::string& source_id) const {
+    const auto cached=info(source_id);
+    if (!cached || cached->sha256.size()!=64 || !std::filesystem::exists(cached->data_path)) return false;
+    std::error_code error;
+    const auto bytes=std::filesystem::file_size(cached->data_path,error);
+    return !error && bytes==cached->bytes && core::sha256_file(cached->data_path)==cached->sha256;
 }
 
 std::optional<std::int64_t> CacheStore::last_fetch_ns(const std::string& source_id) const {

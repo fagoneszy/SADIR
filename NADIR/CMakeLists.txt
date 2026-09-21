@@ -210,6 +210,10 @@ if(BUILD_TESTING)
     target_link_libraries(nadir_ndr_tests PRIVATE nadir_core)
     add_test(NAME nadir_ndr_tests COMMAND nadir_ndr_tests)
 
+    add_executable(nadir_cache_tests tests/test_cache.cpp)
+    target_link_libraries(nadir_cache_tests PRIVATE nadir_core)
+    add_test(NAME nadir_cache_tests COMMAND nadir_cache_tests)
+
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
     add_test(NAME nadir_sgp4_verification COMMAND nadir_sgp4_verification)

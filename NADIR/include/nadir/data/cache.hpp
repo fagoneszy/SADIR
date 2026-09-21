@@ -19,6 +19,8 @@ struct CacheInfo {
     std::string meta_path;
     std::string sha256;
     std::string url;
+    std::string format;
+    std::string license;
     std::int64_t fetched_unix_ns{};
     std::uint64_t bytes{};
     long http_status{};
@@ -31,6 +33,8 @@ public:
     std::optional<std::string> latest(const std::string& source_id) const;
     std::optional<std::int64_t> last_fetch_ns(const std::string& source_id) const;
     std::optional<CacheInfo> info(const std::string& source_id) const;
+    // Verifies that the cached bytes still match the manifest digest and size.
+    bool verify(const std::string& source_id) const;
 private:
     std::string root_;
 };
