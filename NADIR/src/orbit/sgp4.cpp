@@ -7,6 +7,19 @@
 
 namespace nadir::orbit {
 
+double omm_epoch_jd_utc(const astro::OmmRecord& rec) noexcept {
+    if (rec.epoch.empty()) return 0.0;
+    int year = 0, month = 0, day = 0, hour = 0, minute = 0;
+    double second = 0.0;
+    if (std::sscanf(rec.epoch.c_str(), "%d-%d-%dT%d:%d:%lf", &year, &month, &day, &hour, &minute, &second) != 6) return 0.0;
+    const double a = std::floor((14.0 - month) / 12.0);
+    const double y = year + 4800.0 - a;
+    const double m = month + 12.0 * a - 3.0;
+    double jd = day + std::floor((153.0 * m + 2.0) / 5.0) + std::floor(365.0 * y) +
+        std::floor(y / 4.0) - std::floor(y / 100.0) + std::floor(y / 400.0) - 32045.0;
+    return jd - 0.5 + (hour + minute / 60.0 + second / 3600.0) / 24.0;
+}
+
 Sgp4Elements omm_to_elements(const astro::OmmRecord& rec) {
     Sgp4Elements elem;
     elem.norad = rec.norad_cat_id;
@@ -18,19 +31,7 @@ Sgp4Elements omm_to_elements(const astro::OmmRecord& rec) {
     elem.mean_anomaly_rad = deg_to_rad(rec.mean_anomaly_deg);
     elem.mean_motion_rad_min = rev_day_to_rad_min(rec.mean_motion_rev_day);
 
-    elem.epoch_jd = 0.0;
-    if (!rec.epoch.empty()) {
-        int year = 0, month = 0, day = 0, hour = 0, minute = 0;
-        double second = 0.0;
-        if (std::sscanf(rec.epoch.c_str(), "%d-%d-%dT%d:%d:%lf", &year, &month, &day, &hour, &minute, &second) == 6) {
-            double a = (14.0 - month) / 12.0;
-            double y = year + 4800.0 - a;
-            double m = month + 12.0 * a - 3.0;
-            double jd = day + std::floor((153.0 * m + 2.0) / 5.0) + std::floor(365.0 * y) + std::floor(y / 4.0) - std::floor(y / 100.0) + std::floor(y / 400.0) - 32045.0;
-            jd += (hour + minute / 60.0 + second / 3600.0) / 24.0;
-            elem.epoch_jd = jd - 0.5;
-        }
-    }
+    elem.epoch_jd = omm_epoch_jd_utc(rec);
     return elem;
 }
 

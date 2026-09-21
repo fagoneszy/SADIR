@@ -16,6 +16,8 @@
 #include <nadir/earth/space_weather.hpp>
 #include <nadir/geo/eop.hpp>
 #include <nadir/geo/wgs84.hpp>
+#include <nadir/orbit/pass_predictor.hpp>
+#include <nadir/orbit/tracker.hpp>
 #include <nadir/render/earth.hpp>
 #include <nadir/render/earth_mesh.hpp>
 #include <nadir/render/framebuffer.hpp>
@@ -449,7 +451,7 @@ int App::eop(const std::vector<std::string>& args) {
 }
 
 int App::orbit(const std::vector<std::string>& args) {
-    if (args.size()<3 || (args[1]!="list" && args[1]!="live")) { std::cout<<"orbit list <source|group> [query] [limit]\norbit live <source|group> [query] [limit]\n"; return 1; }
+    if (args.size()<3 || (args[1]!="list" && args[1]!="live" && args[1]!="inspect")) { std::cout<<"orbit list <source|group> [query] [limit]\norbit live <source|group> [query] [limit]\norbit inspect <source|group> <query> [lat lon alt_m frequency_hz]\n"; return 1; }
     const auto id=orbital_source(args[2]);
     const auto c=catalog();
     if (!c) return 1;
@@ -462,8 +464,52 @@ int App::orbit(const std::vector<std::string>& args) {
     }
     const auto path=store.latest(id);
     if (!path) { std::cout<<"NO ORBIT CACHE. RUN: nadir orbit live "<<args[2]<<"\n"; return 1; }
-    const auto parsed=astro::load_omm_json(*path);
+    auto parsed=astro::load_omm_json(*path);
     if (!parsed.ok) { std::cout<<"OMM PARSE FAILED "<<parsed.error<<"\n"; return 1; }
+    if (const auto info=store.info(id)) astro::attach_source_metadata(parsed, {id, info->url, info->sha256, core::iso8601_utc(info->fetched_unix_ns), "Vallado SGP4/WGS-72"});
+    if (args[1]=="inspect") {
+        if (args.size()<4) { std::cout<<"orbit inspect <source|group> <query> [lat lon alt_m frequency_hz]\n"; return 1; }
+        const auto matches=astro::find_omm(parsed.records,args[3],1);
+        if (matches.empty()) { std::cout<<"OBJECT NOT FOUND\n"; return 1; }
+        geo::Geodetic observer{};
+        double frequency=0.0;
+        try {
+            if (args.size()>4) observer.latitude_deg=std::stod(args[4]);
+            if (args.size()>5) observer.longitude_deg=std::stod(args[5]);
+            if (args.size()>6) observer.altitude_m=std::stod(args[6]);
+            if (args.size()>7) frequency=std::stod(args[7]);
+        } catch (...) { std::cout<<"INVALID OBSERVER OR FREQUENCY\n"; return 1; }
+        geo::EopRecord eop{}; std::string eop_quality="FALLBACK ZERO-EOP";
+        if (const auto eop_path=store.latest("iers.eop.rapid")) {
+            if (const auto table=geo::load_iers_csv(*eop_path)) {
+                const auto now=core::now_utc();
+                if (const auto current=geo::interpolate_eop(*table,now.mjd_utc)) { eop=*current; eop_quality=eop.prediction?"IERS PREDICTED":"IERS OBSERVED/RAPID"; }
+            }
+        }
+        const auto now=core::now_utc(eop.dut1_s);
+        const auto epoch_jd=orbit::omm_epoch_jd_utc(matches.front());
+        if (epoch_jd==0.0) { std::cout<<"INVALID OMM EPOCH\n"; return 1; }
+        const double minutes=(now.jd_utc-epoch_jd)*1440.0;
+        const orbit::TrackingRequest request{matches.front(),minutes,now.jd_utc,eop,observer,{},frequency};
+        const auto tracked=orbit::track_omm(request);
+        if (!tracked) { std::cout<<"SGP4 FAILED "<<orbit::to_string(tracked.error)<<"\n"; return 1; }
+        const auto elevation=[&](double minute) -> std::optional<double> {
+            auto next=request; next.minutes_since_epoch=minute; next.jd_utc=epoch_jd+minute/1440.0;
+            const auto state=orbit::track_omm(next); return state ? std::optional<double>{state.topocentric.elevation_deg} : std::nullopt;
+        };
+        const auto passes=orbit::predict_passes(elevation,minutes,minutes+1440.0,0.5);
+        const auto& r=matches.front();
+        std::cout<<std::fixed<<std::setprecision(6);
+        std::cout<<r.object_name<<"\nNORAD      "<<r.norad_cat_id<<"\nKIND       PROPAGATED\nQUALITY    "<<(eop.prediction?"PREDICTED":"NOMINAL")<<"\n"
+                 <<"EPOCH      "<<r.epoch<<"\nFRAME      ITRF (TEME/PEF/ITRF)\nORIGIN     EARTH CENTER\n"
+                 <<"LAT        "<<tracked.geodetic.latitude_deg<<" deg\nLON        "<<tracked.geodetic.longitude_deg<<" deg\nALT        "<<tracked.geodetic.altitude_m/1000.0<<" km\n"
+                 <<"AZ         "<<tracked.topocentric.azimuth_deg<<" deg\nEL         "<<tracked.topocentric.elevation_deg<<" deg\nRANGE      "<<tracked.topocentric.range/1000.0<<" km\n"
+                 <<"DOPPLER    "<<tracked.doppler_hz<<" Hz\nLIGHT      "<<(tracked.illumination==orbit::Illumination::Sunlit?"SUNLIT":tracked.illumination==orbit::Illumination::Umbra?"UMBRA":"PENUMBRA")<<"\n";
+        if (!passes.empty()) std::cout<<"AOS        "<<passes.front().aos_minutes-minutes<<" min\nMAX EL     "<<passes.front().max_elevation_deg<<" deg\nLOS        "<<passes.front().los_minutes-minutes<<" min\n";
+        else std::cout<<"AOS        NONE NEXT 24H\n";
+        std::cout<<"SOURCE     "<<r.source_id<<"\nHASH       "<<r.content_sha256<<"\nAGE        "<<r.ingested_at<<"\nMODEL      "<<r.model_version<<"\nEOP        "<<eop_quality<<"\nUNCERTAINTY UNKNOWN\n";
+        return 0;
+    }
     std::string q=args.size()>3?args[3]:"";
     std::size_t limit=25;
     if (args.size()>4) try { limit=static_cast<std::size_t>(std::stoul(args[4])); } catch (...) {}
@@ -613,6 +659,7 @@ void App::help() const {
     std::cout<<"cache <source-id>\n";
     std::cout<<"orbit list <source|group> [query] [limit]\n";
     std::cout<<"orbit live <source|group> [query] [limit]\n";
+    std::cout<<"orbit inspect <source|group> <query> [lat lon alt_m frequency_hz]\n";
     std::cout<<"body info <name>\n";
     std::cout<<"body live <name>\n";
     std::cout<<"targets [query]\n";

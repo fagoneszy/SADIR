@@ -32,6 +32,9 @@ Sgp4Result propagate_sgp4(
     double minutes_since_epoch
 );
 
+// Returns UTC Julian Date from CCSDS OMM EPOCH, or zero for an invalid epoch.
+double omm_epoch_jd_utc(const astro::OmmRecord& elements) noexcept;
+
 std::string to_string(Sgp4Error error);
 
 }
