@@ -124,6 +124,16 @@ OmmParseResult parse_omm_xml(const std::string& text) {
     return parsed ? OmmParseResult{true, {*parsed}, {}} : OmmParseResult{false, {}, "invalid OMM XML"};
 }
 
+void attach_source_metadata(OmmParseResult& result, const OmmSourceMetadata& metadata) {
+    for (auto& record : result.records) {
+        record.source_id = metadata.source_id;
+        record.source_url = metadata.source_url;
+        record.content_sha256 = metadata.content_sha256;
+        record.ingested_at = metadata.ingested_at;
+        record.model_version = metadata.model_version;
+    }
+}
+
 OmmParseResult load_omm_json(const std::string& path) {
     const auto text=json::read_text_file(path);
     if (!text) return {false,{},"cannot read "+path};

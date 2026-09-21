@@ -28,6 +28,19 @@ struct OmmRecord {
     double bstar{};
     double mean_motion_dot{};
     double mean_motion_ddot{};
+    std::string source_id;
+    std::string source_url;
+    std::string content_sha256;
+    std::string ingested_at;
+    std::string model_version;
+};
+
+struct OmmSourceMetadata {
+    std::string source_id;
+    std::string source_url;
+    std::string content_sha256;
+    std::string ingested_at;
+    std::string model_version{"SGP4"};
 };
 
 struct OmmParseResult {
@@ -39,6 +52,7 @@ struct OmmParseResult {
 OmmParseResult parse_omm_json(const std::string& text);
 OmmParseResult parse_omm_kvn(const std::string& text);
 OmmParseResult parse_omm_xml(const std::string& text);
+void attach_source_metadata(OmmParseResult& result, const OmmSourceMetadata& metadata);
 OmmParseResult load_omm_json(const std::string& path);
 std::vector<OmmRecord> find_omm(const std::vector<OmmRecord>& records,const std::string& query,std::size_t limit=50);
 
