@@ -20,6 +20,16 @@ Create a non-overwriting Windows artifact with binary and SHA-256 sums:
 .\tools\package-release.ps1
 ```
 
+## Local performance measurement
+
+```powershell
+.\build\nadir_orbit_benchmark.exe 1000
+```
+
+The benchmark reports SGP4 batch throughput for a deterministic synthetic OMM
+population. It is a local measurement, not a pass/fail gate or an accuracy
+fixture.
+
 The science gate currently covers the Vallado SGP4 verification set and the
 Vallado TEME-to-ITRF reference case. It does not certify every future model.
 
