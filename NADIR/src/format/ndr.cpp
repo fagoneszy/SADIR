@@ -11,6 +11,8 @@ namespace {
 
 constexpr std::size_t header_size = 8 + 2 + 2 + 8 + 8 + 4 + 4;
 constexpr std::uint32_t max_payload_bytes = 64U * 1024U * 1024U;
+constexpr std::size_t sha256_bytes = 32;
+constexpr std::size_t max_source_id_bytes = 255;
 
 template <class T>
 void append_le(std::vector<std::uint8_t>& out, T value) {
@@ -43,6 +45,12 @@ bool take_double(std::span<const std::uint8_t> bytes, std::size_t& offset, doubl
     return std::isfinite(value);
 }
 
+[[nodiscard]] int hex_value(char value) noexcept {
+    if (value >= '0' && value <= '9') return value - '0';
+    if (value >= 'a' && value <= 'f') return value - 'a' + 10;
+    return -1;
+}
+
 void append_header(std::vector<std::uint8_t>& out, const NdrHeader& header) {
     out.insert(out.end(), header.magic.begin(), header.magic.end());
     append_le(out, header.version);
@@ -72,6 +80,43 @@ std::uint32_t crc32(std::span<const std::uint8_t> bytes) {
             crc = (crc >> 1U) ^ ((crc & 1U) ? 0xedb88320U : 0U);
     }
     return ~crc;
+}
+
+std::vector<std::uint8_t> encode_source_block(const NdrSourceBlock& source) {
+    if (source.source_id.empty() || source.source_id.size() > max_source_id_bytes || source.sha256.size() != sha256_bytes * 2)
+        return {};
+    std::vector<std::uint8_t> bytes;
+    bytes.reserve(2 + source.source_id.size() + sha256_bytes + sizeof(source.bytes));
+    for (const auto character : source.source_id) if (static_cast<unsigned char>(character) < 0x20U) return {};
+    append_le(bytes, static_cast<std::uint16_t>(source.source_id.size()));
+    bytes.insert(bytes.end(), source.source_id.begin(), source.source_id.end());
+    for (std::size_t index = 0; index < source.sha256.size(); index += 2) {
+        const int high = hex_value(source.sha256[index]), low = hex_value(source.sha256[index + 1]);
+        if (high < 0 || low < 0) return {};
+        bytes.push_back(static_cast<std::uint8_t>((high << 4) | low));
+    }
+    append_le(bytes, source.bytes);
+    return bytes;
+}
+
+std::optional<NdrSourceBlock> decode_source_block(std::span<const std::uint8_t> bytes) {
+    std::size_t offset{};
+    std::uint16_t source_id_size{};
+    if (!take_le(bytes, offset, source_id_size) || source_id_size == 0 || source_id_size > max_source_id_bytes ||
+        bytes.size() != sizeof(source_id_size) + source_id_size + sha256_bytes + sizeof(std::uint64_t)) return std::nullopt;
+    NdrSourceBlock result;
+    result.source_id.assign(reinterpret_cast<const char*>(bytes.data() + offset), source_id_size);
+    offset += source_id_size;
+    constexpr char digits[] = "0123456789abcdef";
+    result.sha256.reserve(sha256_bytes * 2);
+    for (std::size_t index = 0; index < sha256_bytes; ++index) {
+        const auto value = bytes[offset++];
+        result.sha256.push_back(digits[value >> 4]);
+        result.sha256.push_back(digits[value & 0x0fU]);
+    }
+    if (!take_le(bytes, offset, result.bytes)) return std::nullopt;
+    for (const auto character : result.source_id) if (static_cast<unsigned char>(character) < 0x20U) return std::nullopt;
+    return result;
 }
 
 std::vector<std::uint8_t> encode_state_block(const NdrStateBlock& state) {

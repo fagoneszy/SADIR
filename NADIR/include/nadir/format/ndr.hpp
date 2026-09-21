@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <optional>
 #include <span>
+#include <string>
 #include <vector>
 #include <nadir/orbit/numerical.hpp>
 
@@ -46,6 +47,15 @@ struct NdrStateBlock {
     }
 };
 
+// Immutable reference to the raw cached payload that produced later records.
+// sha256 is lowercase hexadecimal (64 characters); bytes is the raw payload size.
+struct NdrSourceBlock {
+    std::string source_id;
+    std::string sha256;
+    std::uint64_t bytes{};
+    bool operator==(const NdrSourceBlock&) const = default;
+};
+
 struct NdrFile {
     NdrHeader header;
     std::vector<NdrRecord> records;
@@ -64,6 +74,8 @@ private:
 };
 
 std::uint32_t crc32(std::span<const std::uint8_t> bytes);
+std::vector<std::uint8_t> encode_source_block(const NdrSourceBlock& source);
+std::optional<NdrSourceBlock> decode_source_block(std::span<const std::uint8_t> bytes);
 std::vector<std::uint8_t> encode_state_block(const NdrStateBlock& state);
 std::optional<NdrStateBlock> decode_state_block(std::span<const std::uint8_t> bytes);
 bool write_ndr(const std::filesystem::path& path, NdrHeader header,
