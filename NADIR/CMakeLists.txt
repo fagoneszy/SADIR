@@ -48,6 +48,7 @@ add_library(nadir_core
     src/geo/wgs84.cpp
     src/geo/eop.cpp
     src/geo/frames.cpp
+    src/geo/station.cpp
     src/earth/seismic.cpp
     src/earth/space_weather.cpp
     src/earth/fireball.cpp
@@ -182,6 +183,10 @@ if(BUILD_TESTING)
     add_executable(nadir_eop_tests tests/test_eop.cpp)
     target_link_libraries(nadir_eop_tests PRIVATE nadir_core)
     add_test(NAME nadir_eop_tests COMMAND nadir_eop_tests)
+
+    add_executable(nadir_ground_station_tests tests/test_ground_station.cpp)
+    target_link_libraries(nadir_ground_station_tests PRIVATE nadir_core)
+    add_test(NAME nadir_ground_station_tests COMMAND nadir_ground_station_tests)
 
     add_executable(nadir_scene_adapter_tests tests/test_scene_adapter.cpp)
     target_link_libraries(nadir_scene_adapter_tests PRIVATE nadir_core)
