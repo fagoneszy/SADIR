@@ -74,6 +74,7 @@ add_library(nadir_core
     src/orbit/sgp4_deep.cpp
     src/orbit/pass_predictor.cpp
     src/orbit/eclipse.cpp
+    src/orbit/tracker.cpp
     third_party/vallado/SGP4.cpp
     src/math/quat.cpp
     src/space/body.cpp
@@ -147,6 +148,10 @@ if(BUILD_TESTING)
     add_executable(nadir_eclipse_tests tests/test_eclipse.cpp)
     target_link_libraries(nadir_eclipse_tests PRIVATE nadir_core)
     add_test(NAME nadir_eclipse_tests COMMAND nadir_eclipse_tests)
+
+    add_executable(nadir_tracker_tests tests/test_tracker.cpp)
+    target_link_libraries(nadir_tracker_tests PRIVATE nadir_core)
+    add_test(NAME nadir_tracker_tests COMMAND nadir_tracker_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
