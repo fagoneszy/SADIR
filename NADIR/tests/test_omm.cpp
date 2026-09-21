@@ -10,5 +10,7 @@ int main() {
     auto with_source = parsed_kvn;
     nadir::astro::attach_source_metadata(with_source, {"celestrak.omm", "https://example.test/omm", "abc", "2026-01-01T00:01:00", "SGP4"});
     if (with_source.records[0].source_id != "celestrak.omm" || with_source.records[0].content_sha256 != "abc") return 3;
-    return nadir::astro::parse_omm_kvn("NORAD_CAT_ID = 0").ok ? 4 : 0;
+    const auto round_trip=nadir::astro::parse_omm_kvn(nadir::astro::write_omm_kvn(parsed_kvn.records.front()));
+    if (!round_trip.ok || round_trip.records.front().norad_cat_id != 25544 || round_trip.records.front().object_name != "ISS") return 4;
+    return nadir::astro::parse_omm_kvn("NORAD_CAT_ID = 0").ok ? 5 : 0;
 }

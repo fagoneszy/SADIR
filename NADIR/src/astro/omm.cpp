@@ -124,6 +124,20 @@ OmmParseResult parse_omm_xml(const std::string& text) {
     return parsed ? OmmParseResult{true, {*parsed}, {}} : OmmParseResult{false, {}, "invalid OMM XML"};
 }
 
+std::string write_omm_kvn(const OmmRecord& r) {
+    std::ostringstream out; out.precision(17);
+    const auto text = [&](const char* key, const std::string& value) { if (!value.empty()) out << key << " = " << value << '\n'; };
+    const auto number = [&](const char* key, double value) { out << key << " = " << value << '\n'; };
+    text("OBJECT_NAME",r.object_name); text("OBJECT_ID",r.object_id); text("EPOCH",r.epoch);
+    out << "NORAD_CAT_ID = " << r.norad_cat_id << '\n'; text("CLASSIFICATION_TYPE",r.classification_type);
+    text("CENTER_NAME",r.center_name); text("REF_FRAME",r.ref_frame); text("TIME_SYSTEM",r.time_system);
+    number("MEAN_MOTION",r.mean_motion_rev_day); number("ECCENTRICITY",r.eccentricity); number("INCLINATION",r.inclination_deg);
+    number("RA_OF_ASC_NODE",r.raan_deg); number("ARG_OF_PERICENTER",r.arg_pericenter_deg); number("MEAN_ANOMALY",r.mean_anomaly_deg);
+    number("BSTAR",r.bstar); number("MEAN_MOTION_DOT",r.mean_motion_dot); number("MEAN_MOTION_DDOT",r.mean_motion_ddot);
+    out << "EPHEMERIS_TYPE = " << r.ephemeris_type << '\n' << "ELEMENT_SET_NO = " << r.element_set_no << '\n' << "REV_AT_EPOCH = " << r.rev_at_epoch << '\n';
+    text("MEAN_ELEMENT_THEORY",r.mean_element_theory); return out.str();
+}
+
 void attach_source_metadata(OmmParseResult& result, const OmmSourceMetadata& metadata) {
     for (auto& record : result.records) {
         record.source_id = metadata.source_id;
