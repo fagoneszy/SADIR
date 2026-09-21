@@ -116,4 +116,13 @@ std::vector<EphemerisResult> HorizonsEphemerisProvider::fetch_multiple(
     return results;
 }
 
+std::optional<orbit::ThirdBody> geocentric_third_body(const BodyState& body,
+                                                       const BodyState& earth,
+                                                       double mu_m3_s2) {
+    if (body.utc_ns != earth.utc_ns || !std::isfinite(mu_m3_s2) || mu_m3_s2 <= 0.0) return std::nullopt;
+    const auto relative_km = body.heliocentric_position_km - earth.heliocentric_position_km;
+    if (!std::isfinite(relative_km.x) || !std::isfinite(relative_km.y) || !std::isfinite(relative_km.z) || relative_km.norm() <= 0.0) return std::nullopt;
+    return orbit::ThirdBody{relative_km * 1000.0, mu_m3_s2};
+}
+
 } // namespace nadir::space

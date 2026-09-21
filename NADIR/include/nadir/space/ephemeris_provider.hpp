@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nadir/space/body.hpp>
+#include <nadir/orbit/numerical.hpp>
 #include <string>
 #include <vector>
 #include <optional>
@@ -48,5 +49,12 @@ private:
     std::string build_url(const EphemerisQuery& query) const;
     std::optional<BodyState> parse_csv_response(const std::string& csv) const;
 };
+
+// Converts two heliocentric Horizons-style states to a geocentric third-body
+// perturbation. Both states must describe the same epoch; the gravitational
+// parameter is intentionally supplied by the caller/source model.
+std::optional<orbit::ThirdBody> geocentric_third_body(const BodyState& body,
+                                                       const BodyState& earth,
+                                                       double mu_m3_s2);
 
 }

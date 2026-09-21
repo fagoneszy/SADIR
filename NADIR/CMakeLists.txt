@@ -226,6 +226,10 @@ if(BUILD_TESTING)
     target_link_libraries(nadir_numerical_tests PRIVATE nadir_core)
     add_test(NAME nadir_numerical_tests COMMAND nadir_numerical_tests)
 
+    add_executable(nadir_ephemeris_adapter_tests tests/test_ephemeris_adapter.cpp)
+    target_link_libraries(nadir_ephemeris_adapter_tests PRIVATE nadir_core)
+    add_test(NAME nadir_ephemeris_adapter_tests COMMAND nadir_ephemeris_adapter_tests)
+
     add_executable(nadir_ndr_tests tests/test_ndr.cpp)
     target_link_libraries(nadir_ndr_tests PRIVATE nadir_core)
     add_test(NAME nadir_ndr_tests COMMAND nadir_ndr_tests)
