@@ -28,6 +28,12 @@ int main() {
     const nadir::format::NdrReplay replay(*read);
     if (replay.seek(99) || !replay.seek(100) || replay.seek(150)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::Source) ||
         replay.seek(999)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::State)) return 3;
+    std::fstream oversized_count(path, std::ios::in | std::ios::out | std::ios::binary);
+    oversized_count.seekp(20, std::ios::beg); // record_count in the fixed NDR v2 header
+    oversized_count.put(static_cast<char>(0xff));
+    oversized_count.close();
+    if (nadir::format::read_ndr(path)) return 8;
+    if (!nadir::format::write_ndr(path, {.type = 7, .timestamp_ns = 42}, records)) return 9;
     const std::vector<nadir::format::NdrRecord> out_of_order{{1, 2, {}}, {1, 1, {}}};
     if (nadir::format::write_ndr(path, {}, out_of_order)) return 4;
     std::fstream corrupt(path, std::ios::in | std::ios::out | std::ios::binary);

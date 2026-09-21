@@ -10,6 +10,9 @@
 
 namespace nadir::format {
 
+inline constexpr std::uint64_t max_ndr_file_bytes = 256ULL * 1024ULL * 1024ULL;
+inline constexpr std::uint64_t max_ndr_records = 1'000'000ULL;
+
 enum class NdrRecordType : std::uint16_t {
     Source = 1,
     Object = 2,

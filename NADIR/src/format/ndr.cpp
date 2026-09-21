@@ -138,12 +138,16 @@ std::optional<NdrStateBlock> decode_state_block(std::span<const std::uint8_t> by
 
 bool write_ndr(const std::filesystem::path& path, NdrHeader header,
                std::span<const NdrRecord> records) {
+    if (records.size() > max_ndr_records) return false;
     std::vector<std::uint8_t> encoded;
     std::uint64_t previous_timestamp{};
     bool first = true;
     for (const auto& record : records) {
         if (!first && record.timestamp_ns < previous_timestamp) return false;
         if (record.payload.size() > max_payload_bytes) return false;
+        constexpr std::size_t record_prefix_bytes = sizeof(std::uint16_t) + sizeof(std::uint64_t) + sizeof(std::uint32_t);
+        if (encoded.size() > max_ndr_file_bytes - header_size - record_prefix_bytes ||
+            record.payload.size() > max_ndr_file_bytes - header_size - record_prefix_bytes - encoded.size()) return false;
         append_le(encoded, record.type);
         append_le(encoded, record.timestamp_ns);
         append_le(encoded, static_cast<std::uint32_t>(record.payload.size()));
@@ -170,7 +174,7 @@ std::optional<NdrFile> read_ndr(const std::filesystem::path& path) {
     std::ifstream input(path, std::ios::binary | std::ios::ate);
     if (!input) return std::nullopt;
     const auto end = input.tellg();
-    if (end < static_cast<std::streamoff>(header_size)) return std::nullopt;
+    if (end < static_cast<std::streamoff>(header_size) || end > static_cast<std::streamoff>(max_ndr_file_bytes)) return std::nullopt;
     std::vector<std::uint8_t> bytes(static_cast<std::size_t>(end));
     input.seekg(0);
     input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
@@ -179,6 +183,7 @@ std::optional<NdrFile> read_ndr(const std::filesystem::path& path) {
     NdrFile result;
     const auto expected_magic = std::array<char, 8>{'N','A','D','I','R',0,0,2};
     if (!take_header(bytes, result.header) || result.header.magic != expected_magic || result.header.version != 2 ||
+        result.header.record_count > max_ndr_records ||
         result.header.crc32 != crc32(std::span<const std::uint8_t>{bytes}.subspan(header_size))) return std::nullopt;
     std::size_t offset = header_size;
     result.records.reserve(static_cast<std::size_t>(result.header.record_count));
