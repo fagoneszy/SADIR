@@ -84,6 +84,7 @@ add_library(nadir_core
     src/orbit/tracker.cpp
     third_party/vallado/SGP4.cpp
     src/math/quat.cpp
+    src/state/covariance.cpp
     src/space/body.cpp
     src/space/solar_catalog.cpp
     src/space/ephemeris_provider.cpp
@@ -191,6 +192,10 @@ if(BUILD_TESTING)
     add_executable(nadir_snapshot_buffer_tests tests/test_snapshot_buffer.cpp)
     target_link_libraries(nadir_snapshot_buffer_tests PRIVATE nadir_core)
     add_test(NAME nadir_snapshot_buffer_tests COMMAND nadir_snapshot_buffer_tests)
+
+    add_executable(nadir_covariance_tests tests/test_covariance.cpp)
+    target_link_libraries(nadir_covariance_tests PRIVATE nadir_core)
+    add_test(NAME nadir_covariance_tests COMMAND nadir_covariance_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
