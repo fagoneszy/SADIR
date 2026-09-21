@@ -142,6 +142,10 @@ if(BUILD_TESTING)
     target_link_libraries(nadir_renderer3d_tests PRIVATE nadir_core)
     add_test(NAME nadir_renderer3d_tests COMMAND nadir_renderer3d_tests)
 
+    add_executable(nadir_lod_tests tests/test_lod.cpp)
+    target_link_libraries(nadir_lod_tests PRIVATE nadir_core)
+    add_test(NAME nadir_lod_tests COMMAND nadir_lod_tests)
+
     add_executable(nadir_ellipsoid_occlusion_tests tests/test_ellipsoid_occlusion.cpp)
     target_link_libraries(nadir_ellipsoid_occlusion_tests PRIVATE nadir_core)
     add_test(NAME nadir_ellipsoid_occlusion_tests COMMAND nadir_ellipsoid_occlusion_tests)

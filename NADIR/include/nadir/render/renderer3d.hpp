@@ -23,13 +23,22 @@ struct ProjectedLabel {
     std::string text;
 };
 
+struct LodSettings {
+    std::size_t max_labels{256};
+    std::size_t max_segments{4096};
+    // Detail fades as the camera moves away, but never below this fraction.
+    double minimum_detail{0.10};
+};
+
 class Renderer3D {
 public:
     Renderer3D(int width, int height) : depth_(width, height), phosphor_(width, height) {}
 
     void resize(int width, int height) { depth_.resize(width, height); phosphor_.resize(width, height); }
     void set_ellipsoid_occlusion(EllipsoidOcclusion occlusion) noexcept { occlusion_ = occlusion; }
+    void set_lod(LodSettings lod) noexcept { lod_ = lod; }
     [[nodiscard]] const EllipsoidOcclusion& ellipsoid_occlusion() const noexcept { return occlusion_; }
+    [[nodiscard]] const LodSettings& lod() const noexcept { return lod_; }
 
     bool render(const SceneSnapshot&, const Camera&, const DisplayTransform&, double delta_seconds);
     [[nodiscard]] const PhosphorBuffer& phosphor() const noexcept { return phosphor_; }
@@ -42,6 +51,7 @@ private:
     std::vector<ProjectedLabel> labels_;
     RenderStats stats_{};
     EllipsoidOcclusion occlusion_{};
+    LodSettings lod_{};
 };
 
 } // namespace nadir::render

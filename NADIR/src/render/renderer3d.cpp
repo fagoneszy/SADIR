@@ -26,6 +26,14 @@ bool Renderer3D::render(const SceneSnapshot& scene, const Camera& camera,
     const auto inside = [](const ProjectedPoint& point) {
         return point.visible && std::abs(point.x_ndc) <= 1.0 && std::abs(point.y_ndc) <= 1.0;
     };
+    const double detail = std::clamp(4.0 / std::max(0.1, camera.distance), lod_.minimum_detail, 1.0);
+    const std::size_t segment_budget = std::max<std::size_t>(1, static_cast<std::size_t>(lod_.max_segments * detail));
+    const std::size_t label_budget = static_cast<std::size_t>(lod_.max_labels * detail);
+    std::size_t total_segments{};
+    for (const auto& line : scene.polylines)
+        total_segments += line.vertices.size() > 1 ? line.vertices.size() - 1 + (line.closed ? 1 : 0) : 0;
+    const std::size_t segment_stride = total_segments > segment_budget
+        ? (total_segments + segment_budget - 1) / segment_budget : 1;
     const auto rasterize = [&](const NdcPoint& a, const NdcPoint& b, float intensity) {
         const auto first = ndc_to_viewport({a.x, a.y, 1.0 / a.inverse_depth, true},
                                            phosphor_.width(), phosphor_.height());
@@ -80,9 +88,13 @@ bool Renderer3D::render(const SceneSnapshot& scene, const Camera& camera,
         }
     }
     for (const auto& line : scene.polylines) {
-        for (std::size_t i = 1; i < line.vertices.size(); ++i) {
+        for (std::size_t i = segment_stride; i < line.vertices.size(); i += segment_stride) {
             ++stats_.segments_submitted;
-            draw_segment(line.entity_id, line.vertices[i - 1], line.vertices[i], line.intensity);
+            draw_segment(line.entity_id, line.vertices[i - segment_stride], line.vertices[i], line.intensity);
+        }
+        if (line.vertices.size() > 1 && (line.vertices.size() - 1) % segment_stride != 0) {
+            ++stats_.segments_submitted;
+            draw_segment(line.entity_id, line.vertices[((line.vertices.size() - 1) / segment_stride) * segment_stride], line.vertices.back(), line.intensity);
         }
         if (line.closed && line.vertices.size() > 2) {
             ++stats_.segments_submitted;
@@ -102,6 +114,7 @@ bool Renderer3D::render(const SceneSnapshot& scene, const Camera& camera,
     std::sort(labels_.begin(), labels_.end(), [](const auto& a, const auto& b) {
         return a.priority != b.priority ? a.priority > b.priority : a.depth < b.depth;
     });
+    if (labels_.size() > label_budget) labels_.resize(label_budget);
     return true;
 }
 
