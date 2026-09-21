@@ -57,6 +57,7 @@ add_library(nadir_core
     src/render/frame_clock.cpp
     src/render/camera.cpp
     src/render/projection.cpp
+    src/render/picking.cpp
     src/render/depth_buffer.cpp
     src/render/display_transform.cpp
     src/render/clip.cpp
@@ -176,6 +177,10 @@ if(BUILD_TESTING)
     add_executable(nadir_catalog_tests tests/test_catalog.cpp)
     target_link_libraries(nadir_catalog_tests PRIVATE nadir_core)
     add_test(NAME nadir_catalog_tests COMMAND nadir_catalog_tests)
+
+    add_executable(nadir_picking_tests tests/test_picking.cpp)
+    target_link_libraries(nadir_picking_tests PRIVATE nadir_core)
+    add_test(NAME nadir_picking_tests COMMAND nadir_picking_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
