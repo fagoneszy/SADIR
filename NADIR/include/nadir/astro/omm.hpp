@@ -37,6 +37,8 @@ struct OmmParseResult {
 };
 
 OmmParseResult parse_omm_json(const std::string& text);
+OmmParseResult parse_omm_kvn(const std::string& text);
+OmmParseResult parse_omm_xml(const std::string& text);
 OmmParseResult load_omm_json(const std::string& path);
 std::vector<OmmRecord> find_omm(const std::vector<OmmRecord>& records,const std::string& query,std::size_t limit=50);
 

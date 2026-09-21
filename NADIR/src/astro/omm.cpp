@@ -2,6 +2,9 @@
 #include <nadir/core/json.hpp>
 #include <algorithm>
 #include <cctype>
+#include <map>
+#include <regex>
+#include <sstream>
 
 namespace nadir::astro {
 
@@ -62,6 +65,22 @@ static std::optional<OmmRecord> record(const json::Value& v) {
     return r;
 }
 
+static std::optional<OmmRecord> record(const std::map<std::string, std::string>& fields) {
+    const auto get = [&](const char* key) { const auto it = fields.find(key); return it == fields.end() ? std::string{} : it->second; };
+    const auto number = [&](const char* key) { try { return std::stod(get(key)); } catch (...) { return 0.0; } };
+    OmmRecord r;
+    r.object_name=get("OBJECT_NAME"); r.object_id=get("OBJECT_ID"); r.epoch=get("EPOCH");
+    r.classification_type=get("CLASSIFICATION_TYPE"); r.center_name=get("CENTER_NAME");
+    r.ref_frame=get("REF_FRAME"); r.time_system=get("TIME_SYSTEM"); r.mean_element_theory=get("MEAN_ELEMENT_THEORY");
+    r.norad_cat_id=static_cast<std::uint64_t>(number("NORAD_CAT_ID")); r.ephemeris_type=static_cast<int>(number("EPHEMERIS_TYPE"));
+    r.element_set_no=static_cast<int>(number("ELEMENT_SET_NO")); r.rev_at_epoch=static_cast<int>(number("REV_AT_EPOCH"));
+    r.mean_motion_rev_day=number("MEAN_MOTION"); r.eccentricity=number("ECCENTRICITY"); r.inclination_deg=number("INCLINATION");
+    r.raan_deg=number("RA_OF_ASC_NODE"); r.arg_pericenter_deg=number("ARG_OF_PERICENTER"); r.mean_anomaly_deg=number("MEAN_ANOMALY");
+    r.bstar=number("BSTAR"); r.mean_motion_dot=number("MEAN_MOTION_DOT"); r.mean_motion_ddot=number("MEAN_MOTION_DDOT");
+    if (r.norad_cat_id == 0 || r.epoch.empty() || r.mean_motion_rev_day <= 0.0 || r.eccentricity < 0.0 || r.eccentricity >= 1.0) return std::nullopt;
+    return r;
+}
+
 OmmParseResult parse_omm_json(const std::string& text) {
     const auto parsed=json::parse(text);
     if (!parsed.ok) return {false,{},parsed.error+" at "+std::to_string(parsed.offset)};
@@ -78,6 +97,31 @@ OmmParseResult parse_omm_json(const std::string& text) {
     }
     if (out.empty()) return {false,{},"no OMM records"};
     return {true,std::move(out),{}};
+}
+
+OmmParseResult parse_omm_kvn(const std::string& text) {
+    std::map<std::string, std::string> fields;
+    std::istringstream input(text);
+    for (std::string line; std::getline(input, line); ) {
+        const auto equals = line.find('=');
+        if (equals == std::string::npos) continue;
+        auto key = line.substr(0, equals); auto value = line.substr(equals + 1);
+        key.erase(std::remove_if(key.begin(), key.end(), ::isspace), key.end());
+        const auto first = value.find_first_not_of(" \t\r");
+        const auto last = value.find_last_not_of(" \t\r");
+        fields[key] = first == std::string::npos ? "" : value.substr(first, last - first + 1);
+    }
+    const auto parsed = record(fields);
+    return parsed ? OmmParseResult{true, {*parsed}, {}} : OmmParseResult{false, {}, "invalid OMM KVN"};
+}
+
+OmmParseResult parse_omm_xml(const std::string& text) {
+    std::map<std::string, std::string> fields;
+    const std::regex tag(R"(<([A-Z_]+)>([^<]*)</\1>)");
+    for (auto it = std::sregex_iterator(text.begin(), text.end(), tag); it != std::sregex_iterator(); ++it)
+        fields[(*it)[1].str()] = (*it)[2].str();
+    const auto parsed = record(fields);
+    return parsed ? OmmParseResult{true, {*parsed}, {}} : OmmParseResult{false, {}, "invalid OMM XML"};
 }
 
 OmmParseResult load_omm_json(const std::string& path) {
