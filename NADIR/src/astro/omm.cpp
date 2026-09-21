@@ -8,6 +8,8 @@
 
 namespace nadir::astro {
 
+static constexpr std::size_t maximum_omm_bytes = 16U * 1024U * 1024U;
+
 static std::string lower(std::string s) {
     std::transform(s.begin(),s.end(),s.begin(),[](unsigned char c){ return static_cast<char>(std::tolower(c)); });
     return s;
@@ -82,6 +84,7 @@ static std::optional<OmmRecord> record(const std::map<std::string, std::string>&
 }
 
 OmmParseResult parse_omm_json(const std::string& text) {
+    if (text.size() > maximum_omm_bytes) return {false,{},"OMM message exceeds size limit"};
     const auto parsed=json::parse(text);
     if (!parsed.ok) return {false,{},parsed.error+" at "+std::to_string(parsed.offset)};
     std::vector<OmmRecord> out;
@@ -100,6 +103,7 @@ OmmParseResult parse_omm_json(const std::string& text) {
 }
 
 OmmParseResult parse_omm_kvn(const std::string& text) {
+    if (text.size() > maximum_omm_bytes) return {false,{},"OMM message exceeds size limit"};
     std::map<std::string, std::string> fields;
     std::istringstream input(text);
     for (std::string line; std::getline(input, line); ) {
@@ -116,6 +120,7 @@ OmmParseResult parse_omm_kvn(const std::string& text) {
 }
 
 OmmParseResult parse_omm_xml(const std::string& text) {
+    if (text.size() > maximum_omm_bytes) return {false,{},"OMM message exceeds size limit"};
     std::map<std::string, std::string> fields;
     const std::regex tag(R"(<([A-Z_]+)>([^<]*)</\1>)");
     for (auto it = std::sregex_iterator(text.begin(), text.end(), tag); it != std::sregex_iterator(); ++it)

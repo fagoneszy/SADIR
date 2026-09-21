@@ -1,4 +1,5 @@
 #include <nadir/astro/omm.hpp>
+#include <string>
 
 int main() {
     const char* kvn = "OBJECT_NAME = ISS\nNORAD_CAT_ID = 25544\nEPOCH = 2026-01-01T00:00:00\nMEAN_MOTION = 15.5\nECCENTRICITY = 0.001\nINCLINATION = 51.6\nRA_OF_ASC_NODE = 10\nARG_OF_PERICENTER = 20\nMEAN_ANOMALY = 30\n";
@@ -12,5 +13,6 @@ int main() {
     if (with_source.records[0].source_id != "celestrak.omm" || with_source.records[0].content_sha256 != "abc") return 3;
     const auto round_trip=nadir::astro::parse_omm_kvn(nadir::astro::write_omm_kvn(parsed_kvn.records.front()));
     if (!round_trip.ok || round_trip.records.front().norad_cat_id != 25544 || round_trip.records.front().object_name != "ISS") return 4;
-    return nadir::astro::parse_omm_kvn("NORAD_CAT_ID = 0").ok ? 5 : 0;
+    if (nadir::astro::parse_omm_kvn("NORAD_CAT_ID = 0").ok) return 5;
+    return nadir::astro::parse_omm_json(std::string(16U * 1024U * 1024U + 1U, ' ')).ok ? 6 : 0;
 }
