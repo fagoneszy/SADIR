@@ -30,6 +30,15 @@ The benchmark reports SGP4 batch throughput for a deterministic synthetic OMM
 population. It is a local measurement, not a pass/fail gate or an accuracy
 fixture.
 
+For a comparable JSON artifact with workload and machine metadata (without
+overwriting an existing result):
+
+```powershell
+.\tools\run-benchmarks.ps1 -Objects 10000
+```
+
+Use `-Force` only when replacing the default artifact intentionally.
+
 The science gate currently covers the Vallado SGP4 verification set and the
 Vallado TEME-to-ITRF reference case. It does not certify every future model.
 

@@ -26,7 +26,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 43–46 Gaia/4D/network/geospatial layers | open | no implementation sufficient for roadmap scope. |
 | 47 fuzzing | foundation | deterministic mutation sweeps cover OPM, OEM and CDM; libFuzzer campaigns and remaining parsers are open. |
 | 48 ingestion security | foundation | cache hashes and OPM limits; global limits/TLS policy/content validation open. |
-| 49 benchmarks | open | no reproducible benchmark suite. |
+| 49 benchmarks | foundation | deterministic SGP4 batch workload and JSON runner with machine metadata; renderer, memory and wider-catalog suites remain open. |
 | 50 science gate | foundation | Vallado SGP4 + TEME/ITRF oracle; wider science suite open. |
 | 51 network gate | open | no separate online-test gate. |
 | 52–54 licenses/cache/release | foundation | data notice, cache metadata and manifest scripts; reproducible release artifacts/SBOM open. |
