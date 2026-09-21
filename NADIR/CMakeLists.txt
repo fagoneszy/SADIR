@@ -43,6 +43,7 @@ add_library(nadir_core
     src/astro/targets.cpp
     src/astro/horizons.cpp
     src/astro/omm.cpp
+    src/astro/catalog.cpp
     src/astro/sun.cpp
     src/geo/wgs84.cpp
     src/geo/eop.cpp
@@ -171,6 +172,10 @@ if(BUILD_TESTING)
     add_executable(nadir_scene_adapter_tests tests/test_scene_adapter.cpp)
     target_link_libraries(nadir_scene_adapter_tests PRIVATE nadir_core)
     add_test(NAME nadir_scene_adapter_tests COMMAND nadir_scene_adapter_tests)
+
+    add_executable(nadir_catalog_tests tests/test_catalog.cpp)
+    target_link_libraries(nadir_catalog_tests PRIVATE nadir_core)
+    add_test(NAME nadir_catalog_tests COMMAND nadir_catalog_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
