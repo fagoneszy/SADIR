@@ -1,4 +1,5 @@
 #include <nadir/orbit/tracker.hpp>
+#include <nadir/astro/sun.hpp>
 
 #include <cmath>
 
@@ -12,7 +13,8 @@ TrackingResult track_omm(const TrackingRequest& request) {
     const auto geodetic = geo::ecef_to_geodetic(itrf.position);
     const auto topocentric = geo::observe_itrf(itrf, request.observer);
     const Vec3d satellite_km{itrf.position.x / 1000.0, itrf.position.y / 1000.0, itrf.position.z / 1000.0};
-    const auto illumination = classify_earth_eclipse(satellite_km, request.sun_itrf_km);
+    const auto sun = request.sun_itrf_km.norm() > 0.0 ? request.sun_itrf_km : astro::sun_position_itrf_km(request.jd_utc, request.eop);
+    const auto illumination = classify_earth_eclipse(satellite_km, sun);
     const double doppler = request.transmitted_hz > 0.0
         ? geo::doppler_observed_hz(request.transmitted_hz, topocentric.range_rate) : 0.0;
     return {propagated.state, itrf, geodetic, topocentric, doppler, illumination, Sgp4Error::None};

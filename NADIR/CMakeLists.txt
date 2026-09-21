@@ -43,6 +43,7 @@ add_library(nadir_core
     src/astro/targets.cpp
     src/astro/horizons.cpp
     src/astro/omm.cpp
+    src/astro/sun.cpp
     src/geo/wgs84.cpp
     src/geo/eop.cpp
     src/geo/frames.cpp
@@ -157,6 +158,10 @@ if(BUILD_TESTING)
     add_executable(nadir_ground_track_tests tests/test_ground_track.cpp)
     target_link_libraries(nadir_ground_track_tests PRIVATE nadir_core)
     add_test(NAME nadir_ground_track_tests COMMAND nadir_ground_track_tests)
+
+    add_executable(nadir_sun_tests tests/test_sun.cpp)
+    target_link_libraries(nadir_sun_tests PRIVATE nadir_core)
+    add_test(NAME nadir_sun_tests COMMAND nadir_sun_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
