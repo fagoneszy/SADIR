@@ -73,6 +73,7 @@ add_library(nadir_core
     src/system/station.cpp
     src/tui/app.cpp
     src/orbit/sgp4.cpp
+    src/orbit/batch.cpp
     src/orbit/sgp4_init.cpp
     src/orbit/sgp4_deep.cpp
     src/orbit/pass_predictor.cpp
@@ -181,6 +182,10 @@ if(BUILD_TESTING)
     add_executable(nadir_picking_tests tests/test_picking.cpp)
     target_link_libraries(nadir_picking_tests PRIVATE nadir_core)
     add_test(NAME nadir_picking_tests COMMAND nadir_picking_tests)
+
+    add_executable(nadir_batch_tests tests/test_batch.cpp)
+    target_link_libraries(nadir_batch_tests PRIVATE nadir_core)
+    add_test(NAME nadir_batch_tests COMMAND nadir_batch_tests)
 
     add_executable(nadir_sgp4_verification tests/test_sgp4_verification.cpp)
     target_link_libraries(nadir_sgp4_verification PRIVATE nadir_core)
