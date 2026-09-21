@@ -37,7 +37,10 @@ StateVector teme_to_itrf(const StateVector& teme,double jd_utc,const EopRecord& 
     const Vec3 cross_omega{-omega_e*rpef.y,omega_e*rpef.x,0.0};
     const Vec3 vpef=vrot-cross_omega;
     const Mat3 pm=polar_motion(eop.xp_arcsec*arcsec_to_rad,eop.yp_arcsec*arcsec_to_rad);
-    return {pm*rpef,pm*vpef};
+    // Vallado's W is the PEF-to-ITRF polar-motion matrix; the published
+    // TEME-to-ITRF equations apply its transpose to position and velocity.
+    const Mat3 w_transpose=pm.transpose();
+    return {w_transpose*rpef,w_transpose*vpef};
 }
 
 Vec3 ecef_delta_to_enu(const Vec3& d,const Geodetic& observer) {
