@@ -487,7 +487,8 @@ int App::orbit(const std::vector<std::string>& args) {
     if (!path) { std::cout<<"NO ORBIT CACHE. RUN: nadir orbit live "<<args[2]<<"\n"; return 1; }
     auto parsed=astro::load_omm_json(*path);
     if (!parsed.ok) { std::cout<<"OMM PARSE FAILED "<<parsed.error<<"\n"; return 1; }
-    if (const auto info=store.info(id)) astro::attach_source_metadata(parsed, {id, info->url, info->sha256, core::iso8601_utc(info->fetched_unix_ns), "Vallado SGP4/WGS-72"});
+    const auto cache_info=store.info(id);
+    if (cache_info) astro::attach_source_metadata(parsed, {id, cache_info->url, cache_info->sha256, core::iso8601_utc(cache_info->fetched_unix_ns), "Vallado SGP4/WGS-72"});
     if (args[1]=="inspect") {
         if (args.size()<4) { std::cout<<"orbit inspect <source|group> <query> [lat lon alt_m frequency_hz]\n"; return 1; }
         const auto matches=astro::find_omm(parsed.records,args[3],1);
@@ -509,6 +510,10 @@ int App::orbit(const std::vector<std::string>& args) {
             }
         }
         const auto now=core::now_utc(eop.dut1_s);
+        const double source_age_s=cache_info ? std::max(0.0, static_cast<double>(now.unix_ns-cache_info->fetched_unix_ns)/1.0e9) : -1.0;
+        const bool source_stale=source_age_s >= 0.0 && s->interval_seconds > 0 && source_age_s > 2.0 * s->interval_seconds;
+        const std::string quality=source_stale ? "STALE" : !cache_info ? "INVALID" :
+            eop_quality=="FALLBACK ZERO-EOP" ? "ESTIMATED" : eop.prediction ? "PREDICTED" : "PROPAGATED";
         const auto epoch_jd=orbit::omm_epoch_jd_utc(matches.front());
         if (epoch_jd==0.0) { std::cout<<"INVALID OMM EPOCH\n"; return 1; }
         const double minutes=(now.jd_utc-epoch_jd)*1440.0;
@@ -522,14 +527,15 @@ int App::orbit(const std::vector<std::string>& args) {
         const auto passes=orbit::predict_passes(elevation,minutes,minutes+1440.0,0.5);
         const auto& r=matches.front();
         std::cout<<std::fixed<<std::setprecision(6);
-        std::cout<<r.object_name<<"\nNORAD      "<<r.norad_cat_id<<"\nKIND       PROPAGATED\nQUALITY    "<<(eop.prediction?"PREDICTED":"NOMINAL")<<"\n"
+        std::cout<<r.object_name<<"\nNORAD      "<<r.norad_cat_id<<"\nKIND       PROPAGATED\nQUALITY    "<<quality<<"\n"
                  <<"EPOCH      "<<r.epoch<<"\nFRAME      ITRF (TEME/PEF/ITRF)\nORIGIN     EARTH CENTER\n"
                  <<"LAT        "<<tracked.geodetic.latitude_deg<<" deg\nLON        "<<tracked.geodetic.longitude_deg<<" deg\nALT        "<<tracked.geodetic.altitude_m/1000.0<<" km\n"
                  <<"AZ         "<<tracked.topocentric.azimuth_deg<<" deg\nEL         "<<tracked.topocentric.elevation_deg<<" deg\nRANGE      "<<tracked.topocentric.range/1000.0<<" km\n"
                  <<"DOPPLER    "<<tracked.doppler_hz<<" Hz\nLIGHT      "<<(tracked.illumination==orbit::Illumination::Sunlit?"SUNLIT":tracked.illumination==orbit::Illumination::Umbra?"UMBRA":"PENUMBRA")<<"\n";
         if (!passes.empty()) std::cout<<"AOS        "<<passes.front().aos_minutes-minutes<<" min\nMAX EL     "<<passes.front().max_elevation_deg<<" deg\nLOS        "<<passes.front().los_minutes-minutes<<" min\n";
         else std::cout<<"AOS        NONE NEXT 24H\n";
-        std::cout<<"SOURCE     "<<r.source_id<<"\nHASH       "<<r.content_sha256<<"\nAGE        "<<r.ingested_at<<"\nMODEL      "<<r.model_version<<"\nEOP        "<<eop_quality<<"\nUNCERTAINTY UNKNOWN\n";
+        std::cout<<"SOURCE     "<<r.source_id<<"\nHASH       "<<r.content_sha256<<"\nINGESTED   "<<r.ingested_at<<"\nAGE        "
+                 <<(source_age_s >= 0.0 ? std::to_string(source_age_s)+" s" : "UNKNOWN")<<"\nMODEL      "<<r.model_version<<"\nEOP        "<<eop_quality<<"\nUNCERTAINTY UNKNOWN\n";
         return 0;
     }
     std::string q=args.size()>3?args[3]:"";
