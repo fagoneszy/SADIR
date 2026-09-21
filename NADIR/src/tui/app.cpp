@@ -18,6 +18,7 @@
 #include <nadir/geo/wgs84.hpp>
 #include <nadir/orbit/pass_predictor.hpp>
 #include <nadir/orbit/tracker.hpp>
+#include <nadir/orbit/scene_adapter.hpp>
 #include <nadir/render/earth.hpp>
 #include <nadir/render/earth_mesh.hpp>
 #include <nadir/render/framebuffer.hpp>
@@ -168,7 +169,7 @@ int App::earth(const std::vector<std::string>& args) {
     return 0;
 }
 
-int App::earth_live(const std::vector<std::string>&) {
+int App::earth_live(const std::vector<std::string>& args) {
     TerminalSession terminal;
     if (!terminal.valid()) {
         std::cout << "earth live requires an interactive VT terminal\n";
@@ -181,6 +182,26 @@ int App::earth_live(const std::vector<std::string>&) {
     const state::TrackedState earth{399, {{}, {}, epoch, frame_ref, origin},
                                     state::StateKind::Simulated, state::StateQuality::Nominal};
     if (!builder.add_object(earth)) return 1;
+    const bool show_iss=std::find(args.begin(),args.end(),"--iss")!=args.end();
+    if (show_iss) {
+        data::CacheStore store(cache_root());
+        const auto path=store.latest("celestrak.stations");
+        const auto parsed=path?astro::load_omm_json(*path):astro::OmmParseResult{};
+        const auto iss=parsed.ok?astro::find_omm(parsed.records,"25544",1):std::vector<astro::OmmRecord>{};
+        geo::EopRecord eop{};
+        if (const auto ep=store.latest("iers.eop.rapid")) if (const auto table=geo::load_iers_csv(*ep)) {
+            if (const auto value=geo::resolve_eop(*table,core::now_utc().mjd_utc)) eop=value.record;
+        }
+        if (!iss.empty()) {
+            const auto now=core::now_utc(eop.dut1_s);
+            const auto result=orbit::track_omm({iss.front(),(now.jd_utc-orbit::omm_epoch_jd_utc(iss.front()))*1440.0,now.jd_utc,eop,{},{},0.0});
+            if (orbit::add_tracking_scene_object(builder,iss.front().norad_cat_id,result,epoch)) {
+                const math::Vec3d position{result.itrf_m.position.x,result.itrf_m.position.y,result.itrf_m.position.z};
+                builder.add_point({2,position,1.0f});
+                builder.add_label({2,position,"ISS",10});
+            }
+        }
+    }
     const auto mesh = render::generate_earth_mesh(12, 24);
     for (const auto& edge : mesh.lines)
         builder.add_polyline({1, {mesh.vertices[edge[0]], mesh.vertices[edge[1]]}, 0.70f});
@@ -223,7 +244,7 @@ int App::earth_live(const std::vector<std::string>&) {
         renderer.render(scene, camera, display, dt);
         render::HUDState hud{};
         hud.fps = clock.target_fps(); hud.frame = frame++; hud.frame_mode = "DEMO ITRF2020 WGS84";
-        hud.camera_mode = "ORBIT SYNTHETIC"; hud.stars = false; hud.grid = true; hud.entities = 1;
+        hud.camera_mode = show_iss?"ORBIT ITRF / ISS CACHE":"ORBIT SYNTHETIC"; hud.stars = false; hud.grid = true; hud.entities = static_cast<int>(scene.objects.size());
         hud.utc = utc_minute(std::chrono::system_clock::now());
         presenter.render(renderer.phosphor(), hud);
         presenter.present(terminal);
@@ -648,6 +669,7 @@ void App::banner() const {
 
 void App::help() const {
     std::cout<<"earth [--yaw deg] [--pitch deg] [--lat deg] [--lon deg]\n";
+    std::cout<<"earth live [--iss]  (cache: CelesTrak stations + IERS EOP)\n";
     std::cout<<"geo <lat_deg> <lon_deg> <alt_m>\n";
     std::cout<<"time\n";
     std::cout<<"eop [live]\n";
