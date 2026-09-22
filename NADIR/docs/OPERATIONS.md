@@ -21,6 +21,13 @@ public `https://example.com` endpoint and is intentionally not part of CTest):
 cmake --build build --target network-gate --parallel 1
 ```
 
+Validate the live CelesTrak OMM and NOAA/SWPC F10.7 sources through the same
+HTTPS transport and their parsers (also intentionally outside CTest):
+
+```powershell
+cmake --build build --target source-network-gate --parallel 1
+```
+
 Create a non-overwriting Windows artifact with binary and SHA-256 sums:
 
 ```powershell

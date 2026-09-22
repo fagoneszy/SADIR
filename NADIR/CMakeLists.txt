@@ -121,6 +121,8 @@ target_link_libraries(nadir_render_demo PRIVATE nadir_core)
     target_link_libraries(nadir_orbit_benchmark PRIVATE nadir_core)
     add_executable(nadir_network_gate tests/test_network.cpp)
     target_link_libraries(nadir_network_gate PRIVATE nadir_core)
+    add_executable(nadir_source_network_gate tests/test_source_network.cpp)
+    target_link_libraries(nadir_source_network_gate PRIVATE nadir_core)
 include(CTest)
 if(BUILD_TESTING)
     add_executable(nadir_tests tests/test_main.cpp)
@@ -312,5 +314,10 @@ if(BUILD_TESTING)
         COMMAND $<TARGET_FILE:nadir_network_gate> https://example.com
         DEPENDS nadir_network_gate
         COMMENT "Running HTTPS transport network gate"
+    )
+    add_custom_target(source-network-gate
+        COMMAND $<TARGET_FILE:nadir_source_network_gate>
+        DEPENDS nadir_source_network_gate
+        COMMENT "Running CelesTrak and SWPC source network gate"
     )
 endif()

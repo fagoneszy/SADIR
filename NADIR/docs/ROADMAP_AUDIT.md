@@ -28,7 +28,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 48 ingestion security | foundation | cache hashes, parser limits, HTTPS-only transport, HTTPS-only redirects, TLS 1.2 floor, 64 MiB response cap and declared-JSON syntax validation before caching; content-type/schema policy and broader TLS controls remain open. |
 | 49 benchmarks | foundation | deterministic SGP4 batch workload and JSON scaling runner (1/100/1k/10k) with machine metadata; renderer, memory and wider-catalog suites remain open. |
 | 50 science gate | foundation | Vallado SGP4, TEME/ITRF oracle, numerical central/J2/third-body/adaptive/drag/SRP checks and encounter-plane Pc; wider science suite open. |
-| 51 network gate | foundation | separate `network-gate` exercises HTTPS through `HttpClient` against a public endpoint; broader source-specific online checks remain open. |
+| 51 network gate | foundation | separate `network-gate` checks generic HTTPS, while `source-network-gate` fetches and parses a live CelesTrak OMM and NOAA/SWPC F10.7 feed through `HttpClient`; broader source-specific checks remain open. |
 | 52–54 licenses/cache/release | foundation | data notice, cache metadata, source manifest and non-overwriting release packaging with artifact hashes/SBOM/Vallado notice; reproducible cross-platform artifacts remain open. |
 | 55 manual | done | `docs/OPERATIONS.md` documents deterministic and network gates, release packaging, offline operation, cache verification/recovery, freshness labels and troubleshooting; the referenced commands are exposed by `nadir help`. |
 | 56 cleanup | foundation | ignore/gate tooling exists; final repository release audit open. |
