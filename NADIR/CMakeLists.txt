@@ -75,6 +75,7 @@ add_library(nadir_core
     src/satellite/tle.cpp
     src/spacecraft/architecture.cpp
     src/model/obj.cpp
+    src/model/glb.cpp
     src/format/ndr.cpp
     src/system/station.cpp
     src/tui/app.cpp

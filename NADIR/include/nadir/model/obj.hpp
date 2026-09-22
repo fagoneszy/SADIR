@@ -23,4 +23,9 @@ Mesh load_stl_ascii(const std::filesystem::path& path);
 // Loads either ASCII STL or the standard little-endian binary STL encoding.
 Mesh load_stl(const std::filesystem::path& path);
 
+// Loads the first TRIANGLES primitive in a GLB 2.0 file with an embedded BIN
+// chunk. POSITION must be a FLOAT VEC3 accessor; indexed UINT16/UINT32 input
+// is supported.
+Mesh load_glb(const std::filesystem::path& path);
+
 }
