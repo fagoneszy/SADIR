@@ -32,6 +32,7 @@ bool Renderer3D::render(const SceneSnapshot& scene, const Camera& camera,
     std::size_t total_segments{};
     for (const auto& line : scene.polylines)
         total_segments += line.vertices.size() > 1 ? line.vertices.size() - 1 + (line.closed ? 1 : 0) : 0;
+    for (const auto& mesh : scene.meshes) total_segments += mesh.edges.size();
     const std::size_t segment_stride = total_segments > segment_budget
         ? (total_segments + segment_budget - 1) / segment_budget : 1;
     const auto rasterize = [&](const NdcPoint& a, const NdcPoint& b, float intensity) {
@@ -121,6 +122,13 @@ bool Renderer3D::render(const SceneSnapshot& scene, const Camera& camera,
         if (line.closed && line.vertices.size() > 2) {
             ++stats_.segments_submitted;
             draw_segment(line.entity_id, line.vertices.back(), line.vertices.front(), line.intensity);
+        }
+    }
+    for (const auto& mesh : scene.meshes) {
+        for (std::size_t index{}; index < mesh.edges.size(); index += segment_stride) {
+            const auto& edge = mesh.edges[index];
+            ++stats_.segments_submitted;
+            draw_segment(mesh.entity_id, mesh.vertices[edge.a], mesh.vertices[edge.b], mesh.intensity);
         }
     }
     for (const auto& label : scene.labels) {

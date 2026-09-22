@@ -32,6 +32,13 @@ bool SceneSnapshot::valid() const {
         if (polyline.entity_id == 0 || !find_object(polyline.entity_id) || !std::isfinite(polyline.intensity)) return false;
         for (const auto& vertex : polyline.vertices) if (!finite(vertex)) return false;
     }
+    for (const auto& mesh : meshes) {
+        if (mesh.entity_id == 0 || !find_object(mesh.entity_id) || !std::isfinite(mesh.intensity) ||
+            mesh.vertices.empty() || mesh.edges.empty()) return false;
+        for (const auto& vertex : mesh.vertices) if (!finite(vertex)) return false;
+        for (const auto& edge : mesh.edges)
+            if (edge.a >= mesh.vertices.size() || edge.b >= mesh.vertices.size() || edge.a == edge.b) return false;
+    }
     for (const auto& label : labels) {
         if (label.entity_id == 0 || !find_object(label.entity_id) || !finite(label.anchor)) return false;
     }

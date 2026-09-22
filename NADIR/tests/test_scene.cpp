@@ -1,4 +1,5 @@
 #include <nadir/render/scene_builder.hpp>
+#include <nadir/model/obj.hpp>
 
 #include <limits>
 
@@ -60,5 +61,12 @@ int main() {
     const auto uncertainty_scene = uncertainty_builder.build();
     if (uncertainty_scene.points.size() != 1 || std::abs(uncertainty_scene.points[0].radius - 6.0) > 1e-12) return 11;
     if (uncertainty_builder.add_uncertainty_halo(99) || uncertainty_builder.add_uncertainty_halo(1, 0.0)) return 12;
+    model::Mesh mesh{{{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}}, {{0, 1}, {1, 2}, {2, 0}},
+                     "fixture.obj", "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"};
+    render::SceneBuilder mesh_builder{epoch, frame, origin};
+    if (!mesh_builder.add_object(object) || !mesh_builder.add_mesh(1, mesh)) return 13;
+    const auto mesh_scene = mesh_builder.build();
+    if (!mesh_scene.valid() || mesh_scene.meshes.size() != 1 || mesh_scene.meshes[0].content_sha256 != mesh.content_sha256) return 14;
+    if (mesh_builder.add_mesh(2, mesh) || mesh_builder.add_mesh(1, model::Mesh{})) return 15;
     return 0;
 }

@@ -2,6 +2,7 @@
 #include <nadir/render/depth_buffer.hpp>
 #include <nadir/render/renderer3d.hpp>
 #include <nadir/render/scene_builder.hpp>
+#include <nadir/model/obj.hpp>
 
 #include <cmath>
 #include <limits>
@@ -42,5 +43,11 @@ int main() {
     for (int y = 0; y < 100; ++y) for (int x = 0; x < 100; ++x)
         if (renderer.phosphor().get(x, y) > 0.0f) ++illuminated;
     if (illuminated < 40 || renderer.stats().points_visible != 1) return 11;
+    render::SceneBuilder mesh_builder{epoch, frame, origin};
+    if (!mesh_builder.add_object({1, {{}, {}, epoch, frame, origin}, state::StateKind::Simulated,
+                                  state::StateQuality::Nominal})) return 12;
+    const model::Mesh mesh{{{-1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}}, {{0, 1}}, "fixture.obj", "hash"};
+    if (!mesh_builder.add_mesh(1, mesh) || !renderer.render(mesh_builder.build(), camera, {{}, 1.0}, 0.0) ||
+        renderer.stats().segments_submitted != 1 || renderer.stats().segments_visible != 1) return 13;
     return 0;
 }

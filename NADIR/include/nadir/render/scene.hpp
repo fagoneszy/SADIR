@@ -19,6 +19,7 @@ struct SceneSnapshot {
     std::vector<SceneObject> objects;
     std::vector<ScenePoint> points;
     std::vector<ScenePolyline> polylines;
+    std::vector<SceneMesh> meshes;
     std::vector<SceneLabel> labels;
 
     [[nodiscard]] const SceneObject* find_object(std::uint64_t entity_id) const noexcept;
