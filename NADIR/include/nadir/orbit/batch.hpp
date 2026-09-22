@@ -18,6 +18,7 @@ struct PropagationBatch {
 };
 
 PropagationBatch propagate_sgp4_batch(const std::vector<astro::OmmRecord>& records,
-                                      double minutes_since_epoch);
+                                      double minutes_since_epoch,
+                                      std::size_t worker_count = 0);
 
 } // namespace nadir::orbit
