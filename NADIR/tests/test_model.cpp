@@ -112,5 +112,17 @@ int main() {
     const auto bad_obj = nadir::model::load_obj(bad_obj_path);
     std::filesystem::remove(bad_obj_path);
     if (!bad_obj.vertices.empty() || !bad_obj.edges.empty()) return 7;
+    std::uint32_t random = 0x27d4eb2dU;
+    for (int sample{}; sample < 128; ++sample) {
+        const auto length = random % 1024U;
+        random = random * 1664525U + 1013904223U;
+        std::string fuzz; fuzz.reserve(length);
+        for (std::uint32_t index{}; index < length; ++index) { random = random * 1664525U + 1013904223U; fuzz.push_back(static_cast<char>(random >> 24U)); }
+        { std::ofstream output(bad_obj_path, std::ios::binary | std::ios::trunc); output.write(fuzz.data(), static_cast<std::streamsize>(fuzz.size())); }
+        (void)nadir::model::load_obj(bad_obj_path);
+        (void)nadir::model::load_stl(bad_obj_path);
+        (void)nadir::model::load_glb(bad_obj_path);
+    }
+    std::filesystem::remove(bad_obj_path);
     return nadir::model::load_stl_ascii("missing.stl").vertices.empty() ? 0 : 8;
 }

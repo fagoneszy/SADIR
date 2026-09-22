@@ -2,6 +2,7 @@
 #include <nadir/tui/app.hpp>
 
 #include <array>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -63,6 +64,19 @@ int main() {
     corrupt.put('\0');
     corrupt.close();
     if (nadir::format::read_ndr(path)) return 5;
+    std::uint32_t random = 0x9e3779b9U;
+    for (int sample{}; sample < 256; ++sample) {
+        const auto length = random % 512U;
+        random = random * 1664525U + 1013904223U;
+        std::vector<std::uint8_t> fuzz(length);
+        for (auto& byte : fuzz) { random = random * 1664525U + 1013904223U; byte = static_cast<std::uint8_t>(random >> 24U); }
+        { std::ofstream output(path, std::ios::binary | std::ios::trunc); output.write(reinterpret_cast<const char*>(fuzz.data()), static_cast<std::streamsize>(fuzz.size())); }
+        (void)nadir::format::read_ndr(path);
+        (void)nadir::format::decode_source_block(fuzz);
+        (void)nadir::format::decode_object_block(fuzz);
+        (void)nadir::format::decode_state_block(fuzz);
+        (void)nadir::format::decode_event_block(fuzz);
+    }
     std::filesystem::remove(path);
     return 0;
 }
