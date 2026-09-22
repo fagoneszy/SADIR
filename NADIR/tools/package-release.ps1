@@ -32,6 +32,8 @@ Copy-Item -LiteralPath $Binary -Destination (Join-Path $Artifact "nadir.exe")
 Copy-Item -LiteralPath (Join-Path $Root "LICENSE") -Destination (Join-Path $Artifact "LICENSE")
 Copy-Item -LiteralPath (Join-Path $Root "LICENSES-DATA.md") -Destination (Join-Path $Artifact "LICENSES-DATA.md")
 Copy-Item -LiteralPath (Join-Path $Root "MANIFEST.sha256") -Destination (Join-Path $Artifact "SOURCE-MANIFEST.sha256")
+Copy-Item -LiteralPath (Join-Path $Root "docs\SBOM.md") -Destination (Join-Path $Artifact "SBOM.md")
+Copy-Item -LiteralPath (Join-Path $Root "third_party\vallado\NOTICE.md") -Destination (Join-Path $Artifact "VALLADO-NOTICE.md")
 
 $Lines = Get-ChildItem -LiteralPath $Artifact -File | Sort-Object Name | ForEach-Object {
     "{0}  {1}" -f (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name
