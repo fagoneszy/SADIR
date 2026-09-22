@@ -17,4 +17,8 @@ struct Mesh {
 
 Mesh load_obj(const std::filesystem::path& path);
 
+// Loads the textual (ASCII) STL subset. Binary STL is intentionally not
+// interpreted by this loader.
+Mesh load_stl_ascii(const std::filesystem::path& path);
+
 }

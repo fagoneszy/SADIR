@@ -22,7 +22,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 33 numerical propagation | foundation | central, J2, third-body RK4; adaptive high-order, SRP and drag remain open. |
 | 34–37 EGM2008/atmosphere/weather/WMM | open | no validated model/data ingest. |
 | 38–41 DE/SPICE/solar system/small bodies | foundation | Horizons provider and body data; local DE/SPICE and validated display path open. |
-| 42 spacecraft geometry | foundation | OBJ only; STL/GLB provenance binding open. |
+| 42 spacecraft geometry | foundation | OBJ plus tested ASCII STL mesh loaders; binary STL, GLB and provenance binding remain open. |
 | 43–46 Gaia/4D/network/geospatial layers | open | no implementation sufficient for roadmap scope. |
 | 47 fuzzing | foundation | deterministic mutation sweeps cover OPM, OEM and CDM; libFuzzer campaigns and remaining parsers are open. |
 | 48 ingestion security | foundation | cache hashes, parser limits, HTTPS-only transport and 64 MiB response cap; content-type/schema policy and broader TLS controls remain open. |
