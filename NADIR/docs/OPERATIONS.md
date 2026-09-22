@@ -39,8 +39,10 @@ overwriting an existing result):
 
 Use `-Force` only when replacing the default artifact intentionally.
 
-The science gate currently covers the Vallado SGP4 verification set and the
-Vallado TEME-to-ITRF reference case. It does not certify every future model.
+The science gate currently covers the Vallado SGP4 verification set, the
+Vallado TEME-to-ITRF reference case, numerical central/J2/third-body/adaptive
+propagation with drag and SRP, and encounter-plane collision probability. It
+does not certify every future model or an operational conjunction decision.
 
 ## Data synchronization and offline mode
 
@@ -61,6 +63,25 @@ or other `live` commands. Use cached source commands instead. If no snapshot
 exists, the program reports the missing cache rather than silently fabricating
 data.
 
+## Cache integrity and recovery
+
+Run this before relying on a cached source after a disk restore, interrupted
+copy or manual transfer:
+
+```powershell
+.\build\nadir.exe cache <source-id>
+```
+
+`VERIFY PASS` means that the active payload exists, its byte count matches the
+sidecar and its SHA-256 equals the recorded digest. `VERIFY FAIL` means the
+snapshot is unsuitable for scientific use; preserve it for diagnosis, then
+refresh the same source while online. Never edit `.meta` files to force a
+successful verification.
+
+The HTTPS transport rejects non-HTTPS URLs and limits one response to 64 MiB.
+If a legitimate product exceeds that limit, add a bounded, format-specific
+ingestion path and fixture before raising the limit globally.
+
 ## Data freshness
 
 `orbit inspect` shows the catalog ingest time, cache age, quality and EOP
@@ -78,3 +99,5 @@ accuracy claim.
 - Missing compiler: open a Visual Studio x64 developer shell before CMake.
 - Failing gate: run the displayed individual CTest name with
   `ctest --test-dir build -R <name> --output-on-failure`.
+- `VERIFY FAIL`: do not use the active cache snapshot; refresh online or
+  restore a known-good snapshot plus its matching `.meta` file.
