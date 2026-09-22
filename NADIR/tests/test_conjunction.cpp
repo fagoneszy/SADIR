@@ -24,6 +24,8 @@ int main() {
     const auto probability = nadir::orbit::collision_probability_encounter_plane({0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, covariance, covariance, 10.0);
     const auto expected = 1.0 - std::exp(-100.0 / 40'000.0);
     if (!probability || std::abs(*probability - expected) > 1.0e-6) return 5;
-    if (nadir::orbit::collision_probability_encounter_plane({}, {}, covariance, covariance, 10.0)) return 6;
-    return nadir::orbit::screen_conjunctions({},-1.0,1.0).empty()?0:7;
+    const auto rotated_probability = nadir::orbit::collision_probability_encounter_plane({0.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, covariance, covariance, 10.0);
+    if (!rotated_probability || std::abs(*rotated_probability - *probability) > 1.0e-9) return 6;
+    if (nadir::orbit::collision_probability_encounter_plane({}, {}, covariance, covariance, 10.0)) return 7;
+    return nadir::orbit::screen_conjunctions({},-1.0,1.0).empty()?0:8;
 }

@@ -249,6 +249,7 @@ if(BUILD_TESTING)
     add_executable(nadir_conjunction_tests tests/test_conjunction.cpp)
     target_link_libraries(nadir_conjunction_tests PRIVATE nadir_core)
     add_test(NAME nadir_conjunction_tests COMMAND nadir_conjunction_tests)
+    set_tests_properties(nadir_conjunction_tests PROPERTIES LABELS science)
 
     add_executable(nadir_numerical_tests tests/test_numerical.cpp)
     target_link_libraries(nadir_numerical_tests PRIVATE nadir_core)
@@ -282,7 +283,7 @@ if(BUILD_TESTING)
 
     add_custom_target(science-gate
         COMMAND ${CMAKE_CTEST_COMMAND} -L science --output-on-failure
-        DEPENDS nadir_sgp4_verification nadir_frames_tests nadir_numerical_tests
-        COMMENT "Running science gate (SGP4, frame and numerical propagation verification)"
+        DEPENDS nadir_sgp4_verification nadir_frames_tests nadir_numerical_tests nadir_conjunction_tests
+        COMMENT "Running science gate (SGP4, frames, propagation and conjunction verification)"
     )
 endif()
