@@ -1,0 +1,9 @@
+#include <nadir/astro/rinex_nav.hpp>
+#include <cmath>
+#include <iomanip>
+#include <sstream>
+namespace nadir::astro { namespace { constexpr std::size_t max_bytes=16U*1024U*1024U,max_lines=1'000'000U; std::optional<double> number(std::string v){ for(auto& c:v) if(c=='D'||c=='d') c='E'; try{std::size_t n{};auto x=std::stod(v,&n);return n==v.size()&&std::isfinite(x)?std::optional{x}:std::nullopt;}catch(...){return{};} } } 
+RinexNavParseResult parse_rinex_navigation(const std::string& text) { if(text.size()>max_bytes)return{false,{},"RINEX navigation exceeds size limit"}; std::istringstream input(text);std::string line;bool header{},end{};std::size_t lines{};std::vector<RinexNavRecord> records;
+ while(std::getline(input,line)){if(++lines>max_lines)return{false,{},"RINEX navigation has too many lines"};if(!header){if(line.find("RINEX VERSION / TYPE")!=std::string::npos)header=true;continue;}if(!end){if(line.find("END OF HEADER")!=std::string::npos)end=true;continue;}if(line.empty()||line[0]==' ')continue;std::istringstream f(line);std::string id,bias,drift,rate;int y{},mo{},d{},h{},mi{};double s{};if(!(f>>id>>y>>mo>>d>>h>>mi>>s>>bias>>drift>>rate))return{false,{},"invalid RINEX navigation record"};auto b=number(bias),dr=number(drift),r=number(rate);if(id.size()<2||!b||!dr||!r||!std::isfinite(s)||mo<1||mo>12||d<1||d>31||h<0||h>23||mi<0||mi>59||s<0.0||s>=61.0)return{false,{},"invalid RINEX navigation record"};std::ostringstream epoch;epoch<<std::setfill('0')<<std::setw(4)<<y<<'-'<<std::setw(2)<<mo<<'-'<<std::setw(2)<<d<<'T'<<std::setw(2)<<h<<':'<<std::setw(2)<<mi<<':'<<std::fixed<<std::setprecision(3)<<std::setw(6)<<s;records.push_back({id,epoch.str(),*b,*dr,*r});}
+ if(!header||!end||records.empty())return{false,{},"missing RINEX navigation header or records"};return{true,std::move(records),{}}; }
+} // namespace nadir::astro
