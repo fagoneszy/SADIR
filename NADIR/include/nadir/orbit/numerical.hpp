@@ -36,6 +36,17 @@ struct DragModel {
     double earth_rotation_rad_s{7.2921150e-5};
 };
 
+// Cannonball solar-radiation-pressure model. The caller supplies the Sun's
+// inertial geocentric position and spacecraft optical properties.
+struct SolarRadiationPressureModel {
+    math::Vec3d sun_position_m{};
+    double reflectivity_coefficient{};
+    double area_m2{};
+    double mass_kg{};
+    double pressure_at_1au_n_m2{4.56e-6};
+    double astronomical_unit_m{149'597'870'700.0};
+};
+
 struct IntegratorSettings {
     double initial_step_s{60.0};
     double minimum_step_s{0.01};
@@ -48,17 +59,20 @@ math::Vec3d gravity_acceleration(const math::Vec3d& position_m, const GravityMod
                                  std::span<const ThirdBody> third_bodies = {});
 
 math::Vec3d drag_acceleration(const CartesianState& state, const DragModel& drag, const GravityModel& earth = {});
+math::Vec3d solar_radiation_pressure_acceleration(const CartesianState& state, const SolarRadiationPressureModel& model);
 
 // Fixed-step fourth-order Runge-Kutta propagator. It is deliberately separate
 // from SGP4, which remains the correct model for GP/OMM mean elements.
 std::optional<CartesianState> propagate_numerical(CartesianState initial, double duration_s,
                                                    double step_s, const GravityModel& model = {},
                                                    std::span<const ThirdBody> third_bodies = {},
-                                                   std::optional<DragModel> drag = std::nullopt);
+                                                   std::optional<DragModel> drag = std::nullopt,
+                                                   std::optional<SolarRadiationPressureModel> solar_radiation_pressure = std::nullopt);
 
 std::optional<CartesianState> propagate_numerical_adaptive(CartesianState initial, double duration_s,
                                                             IntegratorSettings settings = {}, const GravityModel& model = {},
                                                             std::span<const ThirdBody> third_bodies = {},
-                                                            std::optional<DragModel> drag = std::nullopt);
+                                                            std::optional<DragModel> drag = std::nullopt,
+                                                            std::optional<SolarRadiationPressureModel> solar_radiation_pressure = std::nullopt);
 
 } // namespace nadir::orbit

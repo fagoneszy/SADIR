@@ -33,5 +33,8 @@ int main() {
     const auto with_drag = orbit::propagate_numerical(low_orbit, 60.0, 1.0, central, {}, drag);
     const auto without_drag = orbit::propagate_numerical(low_orbit, 60.0, 1.0, central);
     if (!with_drag || !without_drag || with_drag->velocity_m_s.norm() >= without_drag->velocity_m_s.norm()) return 7;
-    return orbit::propagate_numerical(initial, 1.0, 0.0, central) ? 8 : 0;
+    const orbit::SolarRadiationPressureModel srp{.sun_position_m={149'597'870'700.0, 0.0, 0.0}, .reflectivity_coefficient=1.2, .area_m2=10.0, .mass_kg=500.0};
+    const auto srp_a = orbit::solar_radiation_pressure_acceleration(low_orbit, srp);
+    if (!(srp_a.x < 0.0) || !std::isfinite(srp_a.x)) return 8;
+    return orbit::propagate_numerical(initial, 1.0, 0.0, central) ? 9 : 0;
 }

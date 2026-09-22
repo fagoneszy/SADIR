@@ -16,21 +16,29 @@ bool valid_drag(const DragModel& drag) {
            drag.drag_coefficient >= 0.0 && drag.area_m2 >= 0.0 && drag.mass_kg > 0.0 &&
            drag.reference_density_kg_m3 >= 0.0 && drag.scale_height_m > 0.0;
 }
+bool valid_srp(const SolarRadiationPressureModel& model) {
+    return std::isfinite(model.sun_position_m.x) && std::isfinite(model.sun_position_m.y) && std::isfinite(model.sun_position_m.z) &&
+           std::isfinite(model.reflectivity_coefficient) && std::isfinite(model.area_m2) && std::isfinite(model.mass_kg) &&
+           std::isfinite(model.pressure_at_1au_n_m2) && std::isfinite(model.astronomical_unit_m) &&
+           model.reflectivity_coefficient >= 0.0 && model.area_m2 >= 0.0 && model.mass_kg > 0.0 &&
+           model.pressure_at_1au_n_m2 >= 0.0 && model.astronomical_unit_m > 0.0;
+}
 CartesianState derivative(const CartesianState& state, const GravityModel& model, std::span<const ThirdBody> third_bodies,
-                          const std::optional<DragModel>& drag) {
+                          const std::optional<DragModel>& drag, const std::optional<SolarRadiationPressureModel>& solar_radiation_pressure) {
     auto acceleration = gravity_acceleration(state.position_m, model, third_bodies);
     if (drag) acceleration += drag_acceleration(state, *drag, model);
+    if (solar_radiation_pressure) acceleration += solar_radiation_pressure_acceleration(state, *solar_radiation_pressure);
     return {state.velocity_m_s, acceleration};
 }
 CartesianState add_scaled(const CartesianState& state, const CartesianState& slope, double scale) {
     return {state.position_m + slope.position_m * scale, state.velocity_m_s + slope.velocity_m_s * scale};
 }
 CartesianState rk4_step(CartesianState state, double h, const GravityModel& model, std::span<const ThirdBody> bodies,
-                        const std::optional<DragModel>& drag) {
-    const auto k1 = derivative(state, model, bodies, drag);
-    const auto k2 = derivative(add_scaled(state, k1, h * 0.5), model, bodies, drag);
-    const auto k3 = derivative(add_scaled(state, k2, h * 0.5), model, bodies, drag);
-    const auto k4 = derivative(add_scaled(state, k3, h), model, bodies, drag);
+                        const std::optional<DragModel>& drag, const std::optional<SolarRadiationPressureModel>& solar_radiation_pressure) {
+    const auto k1 = derivative(state, model, bodies, drag, solar_radiation_pressure);
+    const auto k2 = derivative(add_scaled(state, k1, h * 0.5), model, bodies, drag, solar_radiation_pressure);
+    const auto k3 = derivative(add_scaled(state, k2, h * 0.5), model, bodies, drag, solar_radiation_pressure);
+    const auto k4 = derivative(add_scaled(state, k3, h), model, bodies, drag, solar_radiation_pressure);
     state.position_m = state.position_m + (k1.position_m + 2.0*k2.position_m + 2.0*k3.position_m + k4.position_m) * (h/6.0);
     state.velocity_m_s = state.velocity_m_s + (k1.velocity_m_s + 2.0*k2.velocity_m_s + 2.0*k3.velocity_m_s + k4.velocity_m_s) * (h/6.0);
     return state;
@@ -74,16 +82,26 @@ math::Vec3d drag_acceleration(const CartesianState& state, const DragModel& drag
     return relative_velocity * (-0.5 * density * drag.drag_coefficient * drag.area_m2 * speed / drag.mass_kg);
 }
 
+math::Vec3d solar_radiation_pressure_acceleration(const CartesianState& state, const SolarRadiationPressureModel& model) {
+    if (!valid_srp(model)) return {};
+    const auto away_from_sun = state.position_m - model.sun_position_m;
+    const auto distance = away_from_sun.norm();
+    if (!std::isfinite(distance) || distance <= 0.0) return {};
+    const auto magnitude = model.pressure_at_1au_n_m2 * model.reflectivity_coefficient * model.area_m2 / model.mass_kg *
+        std::pow(model.astronomical_unit_m / distance, 2.0);
+    return away_from_sun * (magnitude / distance);
+}
+
 std::optional<CartesianState> propagate_numerical(CartesianState state, double duration_s,
                                                     double step_s, const GravityModel& model, std::span<const ThirdBody> third_bodies,
-                                                    std::optional<DragModel> drag) {
+                                                    std::optional<DragModel> drag, std::optional<SolarRadiationPressureModel> solar_radiation_pressure) {
     if (!valid_model(model) || !std::isfinite(duration_s) || !std::isfinite(step_s) || step_s <= 0.0 ||
-        (drag && !valid_drag(*drag))) return std::nullopt;
+        (drag && !valid_drag(*drag)) || (solar_radiation_pressure && !valid_srp(*solar_radiation_pressure))) return std::nullopt;
     const double direction = duration_s < 0.0 ? -1.0 : 1.0;
     double remaining = std::abs(duration_s);
     while (remaining > 0.0) {
         const double h = direction * std::min(step_s, remaining);
-        state = rk4_step(state, h, model, third_bodies, drag);
+        state = rk4_step(state, h, model, third_bodies, drag, solar_radiation_pressure);
         if (!std::isfinite(state.position_m.x) || !std::isfinite(state.position_m.y) || !std::isfinite(state.position_m.z)) return std::nullopt;
         remaining -= std::abs(h);
     }
@@ -92,18 +110,19 @@ std::optional<CartesianState> propagate_numerical(CartesianState state, double d
 
 std::optional<CartesianState> propagate_numerical_adaptive(CartesianState state, double duration_s,
                                                             IntegratorSettings settings, const GravityModel& model,
-                                                            std::span<const ThirdBody> third_bodies, std::optional<DragModel> drag) {
+                                                            std::span<const ThirdBody> third_bodies, std::optional<DragModel> drag,
+                                                            std::optional<SolarRadiationPressureModel> solar_radiation_pressure) {
     if (!valid_model(model) || !std::isfinite(duration_s) || !std::isfinite(settings.initial_step_s) ||
         settings.minimum_step_s <= 0.0 || settings.maximum_step_s < settings.minimum_step_s ||
-        settings.position_tolerance_m <= 0.0 || (drag && !valid_drag(*drag))) return std::nullopt;
+        settings.position_tolerance_m <= 0.0 || (drag && !valid_drag(*drag)) || (solar_radiation_pressure && !valid_srp(*solar_radiation_pressure))) return std::nullopt;
     const double direction=duration_s < 0.0 ? -1.0 : 1.0;
     double remaining=std::abs(duration_s);
     double step=std::clamp(settings.initial_step_s, settings.minimum_step_s, settings.maximum_step_s);
     while (remaining > 0.0) {
         const double magnitude=std::min(step, remaining);
         const double h=direction*magnitude;
-        const auto full=rk4_step(state,h,model,third_bodies,drag);
-        const auto half=rk4_step(rk4_step(state,h*0.5,model,third_bodies,drag),h*0.5,model,third_bodies,drag);
+        const auto full=rk4_step(state,h,model,third_bodies,drag,solar_radiation_pressure);
+        const auto half=rk4_step(rk4_step(state,h*0.5,model,third_bodies,drag,solar_radiation_pressure),h*0.5,model,third_bodies,drag,solar_radiation_pressure);
         const double error=(half.position_m-full.position_m).norm()/15.0;
         if (!std::isfinite(error)) return std::nullopt;
         if (error <= settings.position_tolerance_m || magnitude <= settings.minimum_step_s) {
