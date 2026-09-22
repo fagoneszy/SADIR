@@ -45,6 +45,7 @@ add_library(nadir_core
     src/astro/tdm.cpp
     src/astro/sp3.cpp
     src/astro/clk.cpp
+    src/astro/gaia.cpp
     src/astro/horizons.cpp
     src/astro/omm.cpp
     src/astro/opm.cpp
@@ -195,6 +196,10 @@ if(BUILD_TESTING)
     add_executable(nadir_clk_tests tests/test_clk.cpp)
     target_link_libraries(nadir_clk_tests PRIVATE nadir_core)
     add_test(NAME nadir_clk_tests COMMAND nadir_clk_tests)
+
+    add_executable(nadir_gaia_tests tests/test_gaia.cpp)
+    target_link_libraries(nadir_gaia_tests PRIVATE nadir_core)
+    add_test(NAME nadir_gaia_tests COMMAND nadir_gaia_tests)
 
     add_executable(nadir_pass_predictor_tests tests/test_pass_predictor.cpp)
     target_link_libraries(nadir_pass_predictor_tests PRIVATE nadir_core)
