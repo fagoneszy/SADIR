@@ -46,6 +46,7 @@ add_library(nadir_core
     src/astro/sp3.cpp
     src/astro/clk.cpp
     src/astro/cpf.cpp
+    src/astro/crd.cpp
     src/astro/gaia.cpp
     src/astro/rinex_nav.cpp
     src/astro/rinex_obs.cpp
@@ -206,6 +207,9 @@ if(BUILD_TESTING)
     add_executable(nadir_cpf_tests tests/test_cpf.cpp)
     target_link_libraries(nadir_cpf_tests PRIVATE nadir_core)
     add_test(NAME nadir_cpf_tests COMMAND nadir_cpf_tests)
+    add_executable(nadir_crd_tests tests/test_crd.cpp)
+    target_link_libraries(nadir_crd_tests PRIVATE nadir_core)
+    add_test(NAME nadir_crd_tests COMMAND nadir_crd_tests)
 
     add_executable(nadir_gaia_tests tests/test_gaia.cpp)
     target_link_libraries(nadir_gaia_tests PRIVATE nadir_core)
