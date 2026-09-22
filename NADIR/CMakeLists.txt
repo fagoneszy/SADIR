@@ -113,8 +113,10 @@ add_executable(nadir src/main.cpp)
 target_link_libraries(nadir PRIVATE nadir_core)
 add_executable(nadir_render_demo tests/render_demo3d.cpp)
 target_link_libraries(nadir_render_demo PRIVATE nadir_core)
-add_executable(nadir_orbit_benchmark tools/benchmark_orbit.cpp)
-target_link_libraries(nadir_orbit_benchmark PRIVATE nadir_core)
+    add_executable(nadir_orbit_benchmark tools/benchmark_orbit.cpp)
+    target_link_libraries(nadir_orbit_benchmark PRIVATE nadir_core)
+    add_executable(nadir_network_gate tests/test_network.cpp)
+    target_link_libraries(nadir_network_gate PRIVATE nadir_core)
 include(CTest)
 if(BUILD_TESTING)
     add_executable(nadir_tests tests/test_main.cpp)
@@ -285,5 +287,10 @@ if(BUILD_TESTING)
         COMMAND ${CMAKE_CTEST_COMMAND} -L science --output-on-failure
         DEPENDS nadir_sgp4_verification nadir_frames_tests nadir_numerical_tests nadir_conjunction_tests
         COMMENT "Running science gate (SGP4, frames, propagation and conjunction verification)"
+    )
+    add_custom_target(network-gate
+        COMMAND $<TARGET_FILE:nadir_network_gate> https://example.com
+        DEPENDS nadir_network_gate
+        COMMENT "Running HTTPS transport network gate"
     )
 endif()

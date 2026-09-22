@@ -14,6 +14,13 @@ ctest --test-dir build --output-on-failure
 cmake --build build --target science-gate --parallel 1
 ```
 
+Run the non-deterministic HTTPS transport check separately (it accesses the
+public `https://example.com` endpoint and is intentionally not part of CTest):
+
+```powershell
+cmake --build build --target network-gate --parallel 1
+```
+
 Create a non-overwriting Windows artifact with binary and SHA-256 sums:
 
 ```powershell
