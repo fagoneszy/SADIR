@@ -1,5 +1,8 @@
 #include <nadir/model/obj.hpp>
+#include <bit>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <map>
 #include <set>
@@ -9,6 +12,62 @@
 #include <utility>
 
 namespace nadir::model {
+
+namespace {
+
+std::uint32_t read_u32_le(const char* data) {
+    return static_cast<std::uint32_t>(static_cast<unsigned char>(data[0])) |
+        (static_cast<std::uint32_t>(static_cast<unsigned char>(data[1])) << 8) |
+        (static_cast<std::uint32_t>(static_cast<unsigned char>(data[2])) << 16) |
+        (static_cast<std::uint32_t>(static_cast<unsigned char>(data[3])) << 24);
+}
+
+float read_f32_le(const char* data) {
+    return std::bit_cast<float>(read_u32_le(data));
+}
+
+bool add_triangle(Mesh& mesh, std::map<std::tuple<double, double, double>, std::size_t>& vertex_indices,
+                  std::set<std::pair<std::size_t, std::size_t>>& unique_edges, const Vec3 (&vertices)[3]) {
+    std::size_t triangle[3]{};
+    for (std::size_t i = 0; i < 3; ++i) {
+        const auto& vertex = vertices[i];
+        if (!std::isfinite(vertex.x) || !std::isfinite(vertex.y) || !std::isfinite(vertex.z)) return false;
+        const auto key = std::tuple{vertex.x, vertex.y, vertex.z};
+        const auto [it, inserted] = vertex_indices.emplace(key, mesh.vertices.size());
+        if (inserted) mesh.vertices.push_back(vertex);
+        triangle[i] = it->second;
+    }
+    for (std::size_t i = 0; i < 3; ++i) {
+        auto a = triangle[i];
+        auto b = triangle[(i + 1) % 3];
+        if (a > b) std::swap(a, b);
+        if (a != b && unique_edges.emplace(a, b).second) mesh.edges.push_back({a, b});
+    }
+    return true;
+}
+
+Mesh load_stl_binary(const std::filesystem::path& path, std::uint32_t triangle_count) {
+    std::ifstream in(path, std::ios::binary);
+    if (!in) return {};
+    in.seekg(84);
+    Mesh mesh;
+    std::map<std::tuple<double, double, double>, std::size_t> vertex_indices;
+    std::set<std::pair<std::size_t, std::size_t>> unique_edges;
+    char record[50];
+    for (std::uint32_t i = 0; i < triangle_count; ++i) {
+        if (!in.read(record, sizeof(record))) return {};
+        Vec3 vertices[3]{};
+        for (std::size_t vertex = 0; vertex < 3; ++vertex) {
+            const auto offset = 12 + vertex * 12;
+            vertices[vertex] = {read_f32_le(record + offset), read_f32_le(record + offset + 4),
+                                read_f32_le(record + offset + 8)};
+        }
+        if (!add_triangle(mesh, vertex_indices, unique_edges, vertices)) return {};
+    }
+    return mesh;
+}
+
+} // namespace
 
 Mesh load_obj(const std::filesystem::path& path) {
     std::ifstream in(path);
@@ -96,6 +155,18 @@ Mesh load_stl_ascii(const std::filesystem::path& path) {
     }
     if (in_loop || malformed) return {};
     return mesh;
+}
+
+Mesh load_stl(const std::filesystem::path& path) {
+    std::ifstream in(path, std::ios::binary);
+    if (!in) return {};
+    char header[84];
+    if (!in.read(header, sizeof(header))) return load_stl_ascii(path);
+    const auto triangle_count = read_u32_le(header + 80);
+    const auto actual_size = std::filesystem::file_size(path);
+    const auto expected_size = 84ull + static_cast<unsigned long long>(triangle_count) * 50ull;
+    if (actual_size == expected_size) return load_stl_binary(path, triangle_count);
+    return load_stl_ascii(path);
 }
 
 }
