@@ -3,6 +3,7 @@
 #include <nadir/astro/gaia.hpp>
 #include <nadir/astro/horizons.hpp>
 #include <nadir/astro/omm.hpp>
+#include <nadir/astro/satcat.hpp>
 #include <nadir/astro/targets.hpp>
 #include <nadir/core/terminal.hpp>
 #include <nadir/core/json.hpp>
@@ -614,12 +615,24 @@ int App::orbit(const std::vector<std::string>& args) {
         };
         const auto passes=orbit::predict_passes(elevation,minutes,minutes+1440.0,0.5);
         const auto& r=matches.front();
+        std::optional<astro::SatcatRecord> satcat;
+        if (const auto satcat_path = store.latest("celestrak.satcat")) {
+            if (const auto text = json::read_text_file(*satcat_path)) {
+                const auto parsed_satcat = astro::parse_satcat_json(*text);
+                if (parsed_satcat.ok) for (const auto& candidate : parsed_satcat.records)
+                    if (candidate.norad_cat_id == r.norad_cat_id) { satcat = candidate; break; }
+            }
+        }
         std::cout<<std::fixed<<std::setprecision(6);
         std::cout<<r.object_name<<"\nNORAD      "<<r.norad_cat_id<<"\nKIND       PROPAGATED\nQUALITY    "<<quality<<"\n"
                  <<"EPOCH      "<<r.epoch<<"\nFRAME      ITRF (TEME/PEF/ITRF)\nORIGIN     EARTH CENTER\n"
                  <<"LAT        "<<tracked.geodetic.latitude_deg<<" deg\nLON        "<<tracked.geodetic.longitude_deg<<" deg\nALT        "<<tracked.geodetic.altitude_m/1000.0<<" km\n"
                  <<"AZ         "<<tracked.topocentric.azimuth_deg<<" deg\nEL         "<<tracked.topocentric.elevation_deg<<" deg\nRANGE      "<<tracked.topocentric.range/1000.0<<" km\n"
                  <<"DOPPLER    "<<tracked.doppler_hz<<" Hz\nLIGHT      "<<(tracked.illumination==orbit::Illumination::Sunlit?"SUNLIT":tracked.illumination==orbit::Illumination::Umbra?"UMBRA":"PENUMBRA")<<"\n";
+        if (satcat) std::cout << "TYPE       " << (satcat->object_type.empty() ? "UNKNOWN" : satcat->object_type)
+                              << "\nOPS STATUS " << (satcat->ops_status_code.empty() ? "UNKNOWN" : satcat->ops_status_code)
+                              << "\nOWNER      " << (satcat->owner.empty() ? "UNKNOWN" : satcat->owner)
+                              << "\nDECAY      " << (satcat->decay_date.empty() ? "NONE" : satcat->decay_date) << "\n";
         if (!passes.empty()) std::cout<<"AOS        "<<passes.front().aos_minutes-minutes<<" min\nMAX EL     "<<passes.front().max_elevation_deg<<" deg\nLOS        "<<passes.front().los_minutes-minutes<<" min\n";
         else std::cout<<"AOS        NONE NEXT 24H\n";
         std::cout<<"SOURCE     "<<r.source_id<<"\nHASH       "<<r.content_sha256<<"\nINGESTED   "<<r.ingested_at<<"\nAGE        "
