@@ -47,6 +47,7 @@ add_library(nadir_core
     src/astro/clk.cpp
     src/astro/gaia.cpp
     src/astro/rinex_nav.cpp
+    src/astro/rinex_obs.cpp
     src/astro/horizons.cpp
     src/astro/omm.cpp
     src/astro/opm.cpp
@@ -205,6 +206,10 @@ if(BUILD_TESTING)
     add_executable(nadir_rinex_nav_tests tests/test_rinex_nav.cpp)
     target_link_libraries(nadir_rinex_nav_tests PRIVATE nadir_core)
     add_test(NAME nadir_rinex_nav_tests COMMAND nadir_rinex_nav_tests)
+
+    add_executable(nadir_rinex_obs_tests tests/test_rinex_obs.cpp)
+    target_link_libraries(nadir_rinex_obs_tests PRIVATE nadir_core)
+    add_test(NAME nadir_rinex_obs_tests COMMAND nadir_rinex_obs_tests)
 
     add_executable(nadir_pass_predictor_tests tests/test_pass_predictor.cpp)
     target_link_libraries(nadir_pass_predictor_tests PRIVATE nadir_core)
