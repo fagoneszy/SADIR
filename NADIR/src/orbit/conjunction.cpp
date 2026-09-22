@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <optional>
 #include <unordered_map>
 
 namespace nadir::orbit {
@@ -47,6 +48,49 @@ struct CellHash {
 }
 
 } // namespace
+
+std::optional<double> collision_probability_encounter_plane(const math::Vec3d& relative_position,
+                                                              const math::Vec3d& relative_velocity,
+                                                              const state::Covariance6& first_covariance,
+                                                              const state::Covariance6& second_covariance,
+                                                              double radius) {
+    if (!finite(relative_position) || !finite(relative_velocity) || !std::isfinite(radius) || radius <= 0.0 ||
+        !state::valid_covariance(first_covariance) || !state::valid_covariance(second_covariance)) return std::nullopt;
+    const auto speed = relative_velocity.norm();
+    if (!std::isfinite(speed) || speed <= 0.0) return std::nullopt;
+    const auto normal = relative_velocity / speed;
+    const math::Vec3d reference = std::abs(normal.x) < 0.8 ? math::Vec3d{1.0, 0.0, 0.0} : math::Vec3d{0.0, 1.0, 0.0};
+    const auto axis_a = normal.cross(reference).normalized();
+    const auto axis_b = normal.cross(axis_a);
+    const auto covariance = [&](const math::Vec3d& left, const math::Vec3d& right) {
+        const auto component = [&](const state::Covariance6& matrix) {
+            const double l[] = {left.x, left.y, left.z}; const double r[] = {right.x, right.y, right.z}; double value{};
+            for (int row = 0; row < 3; ++row) for (int col = 0; col < 3; ++col) value += l[row] * matrix.values[row * 6 + col] * r[col];
+            return value;
+        };
+        return component(first_covariance) + component(second_covariance);
+    };
+    const double c00 = covariance(axis_a, axis_a), c01 = covariance(axis_a, axis_b), c11 = covariance(axis_b, axis_b);
+    const double determinant = c00 * c11 - c01 * c01;
+    if (!std::isfinite(determinant) || determinant <= 0.0) return std::nullopt;
+    const double inverse00 = c11 / determinant, inverse01 = -c01 / determinant, inverse11 = c00 / determinant;
+    const double mean_a = relative_position.dot(axis_a), mean_b = relative_position.dot(axis_b);
+    constexpr int radial_steps = 96, angular_steps = 192;
+    constexpr double two_pi = 6.2831853071795864769;
+    const double normalizer = 1.0 / (two_pi * std::sqrt(determinant));
+    double probability{};
+    for (int radial = 0; radial < radial_steps; ++radial) {
+        const double distance = radius * (static_cast<double>(radial) + 0.5) / radial_steps;
+        for (int angular = 0; angular < angular_steps; ++angular) {
+            const double angle = two_pi * (static_cast<double>(angular) + 0.5) / angular_steps;
+            const double da = distance * std::cos(angle) - mean_a, db = distance * std::sin(angle) - mean_b;
+            const double exponent = -0.5 * (inverse00 * da * da + 2.0 * inverse01 * da * db + inverse11 * db * db);
+            probability += normalizer * std::exp(std::max(exponent, -745.0)) * distance;
+        }
+    }
+    probability *= radius / radial_steps * two_pi / angular_steps;
+    return std::clamp(probability, 0.0, 1.0);
+}
 
 std::vector<Conjunction> screen_conjunctions(const std::vector<ScreeningObject>& objects, double horizon, double threshold) {
     std::vector<Conjunction> result;

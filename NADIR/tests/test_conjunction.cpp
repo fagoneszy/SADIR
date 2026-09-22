@@ -18,5 +18,12 @@ int main() {
     if (sparse_hits.size() != 1 || sparse_hits[0].first_id != 5001 || sparse_hits[0].second_id != 5002) return 3;
     const double huge = std::numeric_limits<double>::max();
     if (nadir::orbit::screen_conjunctions({{7001, {huge, 0.0, 0.0}, {}}, {7002, {huge, 0.0, 0.0}, {}}}, 0.0, 0.0).size() != 1) return 4;
-    return nadir::orbit::screen_conjunctions({},-1.0,1.0).empty()?0:5;
+    nadir::state::Covariance6 covariance{};
+    covariance.values[0] = covariance.values[7] = covariance.values[14] = 10'000.0;
+    covariance.values[21] = covariance.values[28] = covariance.values[35] = 1.0;
+    const auto probability = nadir::orbit::collision_probability_encounter_plane({0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, covariance, covariance, 10.0);
+    const auto expected = 1.0 - std::exp(-100.0 / 40'000.0);
+    if (!probability || std::abs(*probability - expected) > 1.0e-6) return 5;
+    if (nadir::orbit::collision_probability_encounter_plane({}, {}, covariance, covariance, 10.0)) return 6;
+    return nadir::orbit::screen_conjunctions({},-1.0,1.0).empty()?0:7;
 }
