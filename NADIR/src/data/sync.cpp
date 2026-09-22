@@ -1,9 +1,23 @@
 #include <nadir/data/sync.hpp>
+#include <nadir/core/json.hpp>
 #include <nadir/core/time.hpp>
+
+#include <algorithm>
+#include <cctype>
 
 namespace nadir::data {
 
 SyncEngine::SyncEngine(std::string cache_root):cache_(std::move(cache_root)) {}
+
+std::optional<std::string> content_validation_error(const Source& source, const std::string& body) {
+    std::string format = source.format;
+    std::transform(format.begin(), format.end(), format.begin(), [](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+    if (format == "json") {
+        const auto parsed = json::parse(body);
+        if (!parsed.ok) return "JSON content validation failed at " + std::to_string(parsed.offset);
+    }
+    return std::nullopt;
+}
 
 SyncResult SyncEngine::fetch(const Source& source) const {
     SyncResult out;
@@ -24,6 +38,7 @@ SyncResult SyncEngine::fetch(const Source& source) const {
     const auto r=http_.get(source.url);
     out.status=r.status;
     if (!r.ok) { out.error=r.error; return out; }
+    if (const auto error = content_validation_error(source, r.body)) { out.error = *error; return out; }
     const auto cached=cache_.store(source,r.body,r.status);
     if (!cached) { out.error="cache write failed"; return out; }
     out.ok=true;

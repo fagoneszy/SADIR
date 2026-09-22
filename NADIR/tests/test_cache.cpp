@@ -1,4 +1,5 @@
 #include <nadir/data/cache.hpp>
+#include <nadir/data/sync.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -16,6 +17,10 @@ int main() {
     change << "!";
     change.close();
     if (cache.verify(source.id)) return 3;
+    const nadir::data::Source json_source{.id="json.source", .format="JSON"};
+    if (nadir::data::content_validation_error(json_source, "{\"ok\":true}") ||
+        !nadir::data::content_validation_error(json_source, "Invalid query: FORMAT=JSON") ||
+        nadir::data::content_validation_error(source, "not constrained")) return 4;
     std::filesystem::remove_all(root);
     return 0;
 }
