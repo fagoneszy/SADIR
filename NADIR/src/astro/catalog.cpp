@@ -45,4 +45,25 @@ std::vector<CatalogObject> find_catalog(const std::vector<CatalogObject>& catalo
     return result;
 }
 
+void attach_satcat_metadata(std::vector<CatalogObject>& catalog, const std::vector<SatcatRecord>& records) {
+    std::map<std::uint64_t, const SatcatRecord*> indexed;
+    for (const auto& record : records) if (record.norad_cat_id != 0) indexed[record.norad_cat_id] = &record;
+    for (auto& object : catalog) {
+        const auto found = indexed.find(object.omm.norad_cat_id);
+        if (found == indexed.end()) continue;
+        const auto& record = *found->second;
+        object.object_type = record.object_type;
+        object.ops_status_code = record.ops_status_code;
+        object.owner = record.owner;
+        object.launch_date = record.launch_date;
+        object.decay_date = record.decay_date;
+        object.data_status_code = record.data_status_code;
+        object.orbit_center = record.orbit_center;
+        object.orbit_type = record.orbit_type;
+        object.active = record.decay_date.empty();
+        add_alias(object.aliases, record.object_name);
+        add_alias(object.aliases, record.object_id);
+    }
+}
+
 } // namespace nadir::astro

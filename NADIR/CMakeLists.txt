@@ -53,6 +53,7 @@ add_library(nadir_core
     src/astro/opm.cpp
     src/astro/oem.cpp
     src/astro/catalog.cpp
+    src/astro/satcat.cpp
     src/astro/cdm.cpp
     src/astro/sun.cpp
     src/geo/wgs84.cpp
