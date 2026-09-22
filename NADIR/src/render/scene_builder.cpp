@@ -36,7 +36,9 @@ bool SceneBuilder::add_uncertainty_halo(std::uint64_t entity_id, double sigma_mu
 void SceneBuilder::add_polyline(ScenePolyline polyline) { snapshot_.polylines.push_back(std::move(polyline)); }
 bool SceneBuilder::add_mesh(std::uint64_t entity_id, const model::Mesh& mesh, float intensity) {
     if (!snapshot_.find_object(entity_id) || mesh.vertices.empty() || mesh.edges.empty() || !std::isfinite(intensity)) return false;
-    SceneMesh attached{entity_id, mesh.vertices, {}, mesh.source_path, mesh.content_sha256, intensity};
+    SceneMesh attached{entity_id, {}, {}, mesh.source_path, mesh.content_sha256, intensity};
+    attached.vertices.reserve(mesh.vertices.size());
+    for (const auto& vertex : mesh.vertices) attached.vertices.push_back({vertex.x, vertex.y, vertex.z});
     attached.edges.reserve(mesh.edges.size());
     for (const auto& edge : mesh.edges) {
         if (edge.a >= mesh.vertices.size() || edge.b >= mesh.vertices.size() || edge.a == edge.b) return false;

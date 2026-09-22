@@ -248,6 +248,10 @@ if(BUILD_TESTING)
     target_link_libraries(nadir_catalog_tests PRIVATE nadir_core)
     add_test(NAME nadir_catalog_tests COMMAND nadir_catalog_tests)
 
+    add_executable(nadir_inspector_satcat_tests tests/test_inspector_satcat.cpp)
+    target_link_libraries(nadir_inspector_satcat_tests PRIVATE nadir_core)
+    add_test(NAME nadir_inspector_satcat_tests COMMAND nadir_inspector_satcat_tests)
+
     add_executable(nadir_picking_tests tests/test_picking.cpp)
     target_link_libraries(nadir_picking_tests PRIVATE nadir_core)
     add_test(NAME nadir_picking_tests COMMAND nadir_picking_tests)

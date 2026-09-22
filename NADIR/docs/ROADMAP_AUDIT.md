@@ -11,7 +11,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 3–4 OMM/provenance | foundation | JSON/KVN/XML parse, KVN export and cache provenance; full CCSDS profiles remain open. |
 | 5–7 frames/EOP | foundation | TEME→PEF→ITRF plus Vallado Appendix-C oracle; full SOFA/IAU 2000/2006 suite remains open. |
 | 8–13 WGS84/observer/passes/tracks/eclipse/Doppler | done | Dedicated WGS84, tracker, pass, ground-track, eclipse and sun tests. |
-| 14–16 ISS/inspector/picking | foundation | Cached OMM path, inspector and deterministic picking exist; continuous live tracking UI is open. |
+| 14–16 ISS/inspector/picking | foundation | Cached OMM path, inspector with provenance and optional SATCAT type/status/owner/decay, and deterministic picking exist; continuous live tracking UI is open. |
 | 17–19 catalog/performance/SoA | foundation | aliases, 64-bit NORAD/COSPAR lookup, SATCAT type/status/owner/decay metadata, deterministic SoA batches, reusable bounded SGP4 worker pool and snapshot buffer exist; a large-catalog benchmark and frame scheduler remain open. |
 | 20–21 LOD/quality | foundation | renderer LOD and inspector freshness labels; uncertainty visualization is open. |
 | 22–23 covariance/conjunction | foundation | covariance transforms, PSD rejection, deterministic screening, conservative spatial broadphase and numerically integrated encounter-plane Pc; richer encounter dynamics and operational CDM covariance profiles remain open. |
