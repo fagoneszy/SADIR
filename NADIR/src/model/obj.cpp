@@ -78,6 +78,7 @@ Mesh load_stl_binary(const std::filesystem::path& path, std::uint32_t triangle_c
 
 Mesh load_obj(const std::filesystem::path& path) {
     std::ifstream in(path);
+    if (!in) return {};
     Mesh mesh;
     std::set<std::pair<std::size_t, std::size_t>> unique;
     std::string line;
@@ -87,7 +88,7 @@ Mesh load_obj(const std::filesystem::path& path) {
         ss >> tag;
         if (tag == "v") {
             Vec3 v{};
-            ss >> v.x >> v.y >> v.z;
+            if (!(ss >> v.x >> v.y >> v.z) || !std::isfinite(v.x) || !std::isfinite(v.y) || !std::isfinite(v.z)) return {};
             mesh.vertices.push_back(v);
         } else if (tag == "f") {
             std::vector<std::size_t> face;
@@ -95,8 +96,11 @@ Mesh load_obj(const std::filesystem::path& path) {
             while (ss >> token) {
                 const auto slash = token.find('/');
                 const auto raw = token.substr(0, slash);
-                const auto idx = static_cast<std::size_t>(std::stoull(raw));
-                if (idx > 0) face.push_back(idx - 1);
+                try {
+                    const auto idx = static_cast<std::size_t>(std::stoull(raw));
+                    if (idx == 0 || idx > mesh.vertices.size()) return {};
+                    face.push_back(idx - 1);
+                } catch (...) { return {}; }
             }
             if (face.size() >= 2) {
                 for (std::size_t i = 0; i < face.size(); ++i) {

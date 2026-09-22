@@ -96,5 +96,10 @@ int main() {
     if (glb.vertices.size() != 3 || glb.edges.size() != 3) return 4;
     if (obj.content_sha256.size() != 64 || stl.content_sha256.size() != 64 ||
         binary_stl.content_sha256.size() != 64 || glb.content_sha256.size() != 64) return 5;
-    return nadir::model::load_stl_ascii("missing.stl").vertices.empty() ? 0 : 6;
+    const auto bad_obj_path = std::filesystem::temp_directory_path() / "nadir-model-bad.obj";
+    { std::ofstream bad(bad_obj_path); bad << "v 0 0 0\nf no-number\n"; }
+    const auto bad_obj = nadir::model::load_obj(bad_obj_path);
+    std::filesystem::remove(bad_obj_path);
+    if (!bad_obj.vertices.empty() || !bad_obj.edges.empty()) return 6;
+    return nadir::model::load_stl_ascii("missing.stl").vertices.empty() ? 0 : 7;
 }
