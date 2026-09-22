@@ -56,6 +56,7 @@ does not certify every future model or an operational conjunction decision.
 ```powershell
 .\build\nadir.exe sources orbit
 .\build\nadir.exe sync preset:orbit-live
+.\build\nadir.exe sync celestrak.satcat
 .\build\nadir.exe cache celestrak.stations
 .\build\nadir.exe orbit inspect stations ISS -12.093 -45.786 850 145800000
 ```
