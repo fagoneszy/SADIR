@@ -1,5 +1,6 @@
 #include <nadir/tui/app.hpp>
 #include <nadir/astro/bodies.hpp>
+#include <nadir/astro/gaia.hpp>
 #include <nadir/astro/horizons.hpp>
 #include <nadir/astro/omm.hpp>
 #include <nadir/astro/targets.hpp>
@@ -129,6 +130,7 @@ int App::command(const std::vector<std::string>& args) {
     if (args[0]=="presets") return presets(args);
     if (args[0]=="sync") return sync(args);
     if (args[0]=="cache") return cache(args);
+    if (args[0]=="gaia") return gaia(args);
     if (args[0]=="ndr") return ndr(args);
     if (args[0]=="body") return body(args);
     if (args[0]=="targets") return targets(args);
@@ -365,6 +367,25 @@ int App::cache(const std::vector<std::string>& args) {
     const bool valid=store.verify(args[1]);
     std::cout<<"SOURCE  "<<i->source_id<<"\nFETCHED "<<core::iso8601_utc(i->fetched_unix_ns)<<"\nAGE     "<<std::fixed<<std::setprecision(1)<<age<<" s\nBYTES   "<<i->bytes<<"\nSHA256  "<<i->sha256<<"\nVERIFY  "<<(valid?"PASS":"FAIL")<<"\nSTATUS  "<<i->http_status<<"\nPATH    "<<i->data_path<<"\nURL     "<<i->url<<"\n";
     return valid?0:2;
+}
+
+int App::gaia(const std::vector<std::string>& args) {
+    if (args.size() < 3 || args.size() > 4 || args[1] != "inspect") {
+        std::cout << "gaia inspect <csv-path> [epoch_year]\n";
+        return 1;
+    }
+    const auto text = json::read_text_file(args[2]);
+    if (!text) { std::cout << "GAIA READ FAILED\n"; return 1; }
+    const auto parsed = astro::parse_gaia_csv(*text);
+    if (!parsed.ok || !parsed.sources) { std::cout << "GAIA PARSE FAILED " << parsed.error << "\n"; return 1; }
+    double epoch = parsed.sources->front().reference_epoch_year;
+    if (args.size() == 4) try { epoch = std::stod(args[3]); } catch (...) { std::cout << "INVALID EPOCH\n"; return 1; }
+    const auto position = astro::propagate_gaia_linear(parsed.sources->front(), epoch);
+    if (!position) { std::cout << "GAIA PROPAGATION FAILED\n"; return 1; }
+    const auto& source = parsed.sources->front();
+    std::cout << "SOURCES " << parsed.sources->size() << "\nSOURCE " << source.source_id << "\nG " << source.g_magnitude
+              << "\nEPOCH " << epoch << "\nRA " << position->right_ascension_deg << "\nDEC " << position->declination_deg << "\n";
+    return 0;
 }
 
 int App::ndr(const std::vector<std::string>& args) {
@@ -753,6 +774,7 @@ void App::help() const {
     std::cout<<"presets [name]\n";
     std::cout<<"sync <source-id|domain:name|preset:name>\n";
     std::cout<<"cache <source-id>\n";
+    std::cout<<"gaia inspect <csv-path> [epoch_year]\n";
     std::cout<<"ndr inspect <path>\nndr seek <path> <timestamp_ns>\n";
     std::cout<<"orbit list <source|group> [query] [limit]\n";
     std::cout<<"orbit live <source|group> [query] [limit]\n";

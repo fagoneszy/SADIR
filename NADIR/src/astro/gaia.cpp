@@ -4,7 +4,7 @@
 #include <unordered_map>
 namespace nadir::astro {
 namespace { constexpr std::size_t max_bytes=64U*1024U*1024U, max_lines=1'000'000U;
-std::vector<std::string> fields(const std::string& line) { std::vector<std::string> out; std::string value; std::istringstream input(line); while (std::getline(input,value,',')) out.push_back(value); return out; }
+std::vector<std::string> fields(const std::string& line) { std::vector<std::string> out; std::string value; std::istringstream input(line); while (std::getline(input,value,',')) { if(!value.empty() && value.back()=='\r') value.pop_back(); out.push_back(value); } return out; }
 std::optional<double> number(const std::string& value) { try { std::size_t used{}; const auto result=std::stod(value,&used); return used==value.size() && std::isfinite(result)?std::optional{result}:std::nullopt; } catch (...) { return std::nullopt; } }
 } // namespace
 GaiaParseResult parse_gaia_csv(const std::string& text) {
