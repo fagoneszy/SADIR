@@ -253,6 +253,7 @@ if(BUILD_TESTING)
     add_executable(nadir_numerical_tests tests/test_numerical.cpp)
     target_link_libraries(nadir_numerical_tests PRIVATE nadir_core)
     add_test(NAME nadir_numerical_tests COMMAND nadir_numerical_tests)
+    set_tests_properties(nadir_numerical_tests PROPERTIES LABELS science)
 
     add_executable(nadir_ephemeris_adapter_tests tests/test_ephemeris_adapter.cpp)
     target_link_libraries(nadir_ephemeris_adapter_tests PRIVATE nadir_core)
@@ -281,7 +282,7 @@ if(BUILD_TESTING)
 
     add_custom_target(science-gate
         COMMAND ${CMAKE_CTEST_COMMAND} -L science --output-on-failure
-        DEPENDS nadir_sgp4_verification nadir_frames_tests
-        COMMENT "Running science gate (Vallado SGP4 and TEME-to-ITRF verification)"
+        DEPENDS nadir_sgp4_verification nadir_frames_tests nadir_numerical_tests
+        COMMENT "Running science gate (SGP4, frame and numerical propagation verification)"
     )
 endif()
