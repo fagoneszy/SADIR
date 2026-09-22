@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     std::vector<nadir::astro::OmmRecord> records(count, seed);
     for (std::size_t i=0; i<count; ++i) records[i].norad_cat_id += i;
     const auto start=std::chrono::steady_clock::now();
-    const auto batch=nadir::orbit::propagate_sgp4_batch(records, 30.0);
+    const auto batch=nadir::orbit::propagate_sgp4_batch(records, 30.0, 0);
     const double elapsed=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
     if (batch.size()!=count || elapsed<=0.0) return 1;
     std::cout<<"OBJECTS "<<count<<"\nSECONDS "<<std::fixed<<std::setprecision(6)<<elapsed

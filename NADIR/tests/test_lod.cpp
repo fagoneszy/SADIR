@@ -16,7 +16,8 @@ int main() {
     render::Renderer3D renderer(80, 40);
     renderer.set_lod({.max_labels = 3, .max_segments = 2, .minimum_detail = 1.0});
     render::Camera camera{};
-    if (!renderer.render(scene, camera, {}, 0.0) || renderer.labels().size() != 3) return 2;
+    if (!renderer.render(scene, camera, {}, 0.0)) return 2;
+    if (renderer.labels().size() != 3) return 4;
     if (renderer.stats().segments_submitted > 2) return 3;
     return 0;
 }

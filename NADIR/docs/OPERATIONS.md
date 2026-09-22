@@ -41,10 +41,12 @@ For a comparable JSON artifact with workload and machine metadata (without
 overwriting an existing result):
 
 ```powershell
-.\tools\run-benchmarks.ps1 -Objects 10000
+.\tools\run-benchmarks.ps1
 ```
 
-Use `-Force` only when replacing the default artifact intentionally.
+The default artifact records 1, 100, 1,000 and 10,000 objects. Pass one or
+more explicit values with `-Objects 5000,10000`; use `-Force` only when
+replacing an artifact intentionally.
 
 The science gate currently covers the Vallado SGP4 verification set, the
 Vallado TEME-to-ITRF reference case, numerical central/J2/third-body/adaptive
