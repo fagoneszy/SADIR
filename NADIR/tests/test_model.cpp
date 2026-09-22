@@ -32,6 +32,7 @@ int main() {
     const auto stl_path = std::filesystem::temp_directory_path() / "nadir-model-test.stl";
     const auto binary_stl_path = std::filesystem::temp_directory_path() / "nadir-model-test-binary.stl";
     const auto glb_path = std::filesystem::temp_directory_path() / "nadir-model-test.glb";
+    const auto malformed_glb_path = std::filesystem::temp_directory_path() / "nadir-model-malformed.glb";
     {
         std::ofstream obj(obj_path);
         obj << "v 0 0 0\n"
@@ -80,26 +81,36 @@ int main() {
         }
         bin.push_back(0); bin.push_back(0); bin.push_back(1); bin.push_back(0); bin.push_back(2); bin.push_back(0);
         write_padded_chunk(glb, bin, 0x004e4942U);
+        const std::string malformed = R"({"asset":{"version":"2.0"},"bufferViews":[],"accessors":[{}],"meshes":[{"primitives":[{"attributes":{"POSITION":0}}]}]})";
+        const auto malformed_size = (malformed.size() + 3U) & ~std::size_t{3U};
+        std::ofstream malformed_glb(malformed_glb_path, std::ios::binary);
+        write_u32_le(malformed_glb, 0x46546c67U);
+        write_u32_le(malformed_glb, 2);
+        write_u32_le(malformed_glb, static_cast<std::uint32_t>(12U + 8U + malformed_size));
+        write_padded_chunk(malformed_glb, malformed, 0x4e4f534aU);
     }
 
     const auto obj = nadir::model::load_obj(obj_path);
     const auto stl = nadir::model::load_stl_ascii(stl_path);
     const auto binary_stl = nadir::model::load_stl(binary_stl_path);
     const auto glb = nadir::model::load_glb(glb_path);
+    const auto malformed_glb = nadir::model::load_glb(malformed_glb_path);
     std::filesystem::remove(obj_path);
     std::filesystem::remove(stl_path);
     std::filesystem::remove(binary_stl_path);
     std::filesystem::remove(glb_path);
+    std::filesystem::remove(malformed_glb_path);
     if (obj.vertices.size() != 3 || obj.edges.size() != 3) return 1;
     if (stl.vertices.size() != 4 || stl.edges.size() != 5) return 2;
     if (binary_stl.vertices.size() != 3 || binary_stl.edges.size() != 3) return 3;
     if (glb.vertices.size() != 3 || glb.edges.size() != 3) return 4;
+    if (!malformed_glb.vertices.empty() || !malformed_glb.edges.empty()) return 5;
     if (obj.content_sha256.size() != 64 || stl.content_sha256.size() != 64 ||
-        binary_stl.content_sha256.size() != 64 || glb.content_sha256.size() != 64) return 5;
+        binary_stl.content_sha256.size() != 64 || glb.content_sha256.size() != 64) return 6;
     const auto bad_obj_path = std::filesystem::temp_directory_path() / "nadir-model-bad.obj";
     { std::ofstream bad(bad_obj_path); bad << "v 0 0 0\nf no-number\n"; }
     const auto bad_obj = nadir::model::load_obj(bad_obj_path);
     std::filesystem::remove(bad_obj_path);
-    if (!bad_obj.vertices.empty() || !bad_obj.edges.empty()) return 6;
-    return nadir::model::load_stl_ascii("missing.stl").vertices.empty() ? 0 : 7;
+    if (!bad_obj.vertices.empty() || !bad_obj.edges.empty()) return 7;
+    return nadir::model::load_stl_ascii("missing.stl").vertices.empty() ? 0 : 8;
 }

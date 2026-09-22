@@ -105,8 +105,10 @@ Mesh load_glb(const std::filesystem::path& path) {
     if (!primitive || !attributes || !attributes->contains("POSITION")) return {};
     const auto position_accessor_index = size_value(&attributes->at("POSITION"));
     const auto* position_accessor = position_accessor_index ? object_at(accessors, *position_accessor_index) : nullptr;
-    if (!position_accessor || position_accessor->at("componentType").as_number() != 5126.0 ||
-        position_accessor->at("type").as_string() != "VEC3") return {};
+    const auto* position_component_type = field(position_accessor, "componentType");
+    const auto* position_type = field(position_accessor, "type");
+    if (!position_accessor || !position_component_type || !position_type || position_component_type->as_number() != 5126.0 ||
+        position_type->as_string() != "VEC3") return {};
     const auto position_view_index = size_value(field(position_accessor, "bufferView"));
     const auto position_count = size_value(field(position_accessor, "count"));
     const auto* position_view = position_view_index ? object_at(views, *position_view_index) : nullptr;
