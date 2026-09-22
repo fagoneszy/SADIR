@@ -1,6 +1,7 @@
 #include <nadir/astro/tdm.hpp>
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 
 int main() {
@@ -23,5 +24,17 @@ DATA_STOP
         *round_trip.record->observations.front().range_m != *observation.range_m) return 3;
     if (nadir::astro::parse_tdm_kvn("CCSDS_TDM_VERS = 2.0\nTIME_SYSTEM = UTC\nDATA_START\nRANGE = 1\nDATA_STOP").ok ||
         nadir::astro::parse_tdm_kvn(std::string(1024U * 1024U + 1U, 'x')).ok) return 4;
+    std::uint32_t random = 0x34b7e819U;
+    for (int sample = 0; sample < 512; ++sample) {
+        const int length = static_cast<int>(random % 512U);
+        random = random * 1664525U + 1013904223U;
+        std::string fuzz;
+        fuzz.reserve(length);
+        for (int index = 0; index < length; ++index) {
+            random = random * 1664525U + 1013904223U;
+            fuzz.push_back(static_cast<char>(random >> 24U));
+        }
+        (void)nadir::astro::parse_tdm_kvn(fuzz);
+    }
     return 0;
 }
