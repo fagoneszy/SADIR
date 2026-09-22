@@ -30,11 +30,11 @@ HttpClient::~HttpClient() = default;
 
 HttpResponse HttpClient::get(const std::string& url) const {
     HttpResponse r;
-    if (!url.starts_with("https://") || url.find_first_of("\"\r\n%") != std::string::npos) {
+    if (!url.starts_with("https://") || url.size() == 8 || url.find_first_of("\"\r\n%@# ") != std::string::npos || url.find('\t') != std::string::npos) {
         r.error="HTTPS URL rejected by transport policy";
         return r;
     }
-    const std::string cmd="curl --proto =https -L --fail --silent --show-error --max-time 120 --max-filesize " +
+    const std::string cmd="curl --proto =https --proto-redir =https --tlsv1.2 -L --fail --silent --show-error --connect-timeout 15 --max-time 120 --max-filesize " +
         std::to_string(max_http_body_bytes) + " --user-agent \"NADIR/0.3 public-data-client\" --write-out \"\\nNADIR_HTTP:%{http_code}\" "+quote(url);
 #ifdef _WIN32
     FILE* pipe=_popen(cmd.c_str(),"rb");
