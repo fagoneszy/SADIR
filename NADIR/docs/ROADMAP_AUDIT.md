@@ -30,7 +30,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 50 science gate | foundation | Vallado SGP4, TEME/ITRF oracle, numerical central/J2/third-body/adaptive/drag/SRP checks and encounter-plane Pc; wider science suite open. |
 | 51 network gate | foundation | separate `network-gate` exercises HTTPS through `HttpClient` against a public endpoint; broader source-specific online checks remain open. |
 | 52–54 licenses/cache/release | foundation | data notice, cache metadata, source manifest and non-overwriting release packaging with artifact hashes/SBOM/Vallado notice; reproducible cross-platform artifacts remain open. |
-| 55 manual | foundation | README/docs exist; operational offline/update troubleshooting manual open. |
+| 55 manual | done | `docs/OPERATIONS.md` documents deterministic and network gates, release packaging, offline operation, cache verification/recovery, freshness labels and troubleshooting; the referenced commands are exposed by `nadir help`. |
 | 56 cleanup | foundation | ignore/gate tooling exists; final repository release audit open. |
 
 Run the current deterministic suite with:
