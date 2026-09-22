@@ -42,6 +42,7 @@ add_library(nadir_core
     src/data/sync.cpp
     src/astro/bodies.cpp
     src/astro/targets.cpp
+    src/astro/tdm.cpp
     src/astro/horizons.cpp
     src/astro/omm.cpp
     src/astro/opm.cpp
@@ -177,6 +178,10 @@ if(BUILD_TESTING)
     add_executable(nadir_cdm_tests tests/test_cdm.cpp)
     target_link_libraries(nadir_cdm_tests PRIVATE nadir_core)
     add_test(NAME nadir_cdm_tests COMMAND nadir_cdm_tests)
+
+    add_executable(nadir_tdm_tests tests/test_tdm.cpp)
+    target_link_libraries(nadir_tdm_tests PRIVATE nadir_core)
+    add_test(NAME nadir_tdm_tests COMMAND nadir_tdm_tests)
 
     add_executable(nadir_pass_predictor_tests tests/test_pass_predictor.cpp)
     target_link_libraries(nadir_pass_predictor_tests PRIVATE nadir_core)
