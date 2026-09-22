@@ -389,8 +389,8 @@ int App::gaia(const std::vector<std::string>& args) {
 }
 
 int App::ndr(const std::vector<std::string>& args) {
-    if (args.size() < 3 || args.size() > 4 || (args[1] != "inspect" && args[1] != "seek")) {
-        std::cout << "ndr inspect <path>\nndr seek <path> <timestamp_ns>\n";
+    if (args.size() < 3 || args.size() > 5 || (args[1] != "inspect" && args[1] != "seek" && args[1] != "replay")) {
+        std::cout << "ndr inspect <path>\nndr seek <path> <timestamp_ns>\nndr replay <path> [from_ns] [to_ns]\n";
         return 1;
     }
     const auto file = format::read_ndr(args[2]);
@@ -400,6 +400,25 @@ int App::ndr(const std::vector<std::string>& args) {
         std::cout << "NDR V" << file->header.version << "\nTYPE " << file->header.type
                   << "\nTIMESTAMP " << file->header.timestamp_ns << "\nRECORDS " << file->records.size()
                   << "\nCRC32 " << file->header.crc32 << "\n";
+        return 0;
+    }
+    if (args[1] == "replay") {
+        if (args.size() < 3 || args.size() > 5) { std::cout << "ndr replay <path> [from_ns] [to_ns]\n"; return 1; }
+        std::uint64_t from{};
+        std::uint64_t to{std::numeric_limits<std::uint64_t>::max()};
+        try {
+            if (args.size() >= 4) from = std::stoull(args[3]);
+            if (args.size() == 5) to = std::stoull(args[4]);
+        } catch (...) { std::cout << "INVALID TIMESTAMP\n"; return 1; }
+        if (from > to) { std::cout << "INVALID RANGE\n"; return 1; }
+        std::size_t replayed{};
+        for (const auto& record : file->records) {
+            if (record.timestamp_ns < from || record.timestamp_ns > to) continue;
+            std::cout << "TIMESTAMP " << record.timestamp_ns << " TYPE " << record.type
+                      << " PAYLOAD " << record.payload.size() << "\n";
+            ++replayed;
+        }
+        std::cout << "REPLAYED " << replayed << "\n";
         return 0;
     }
     if (args.size() != 4) { std::cout << "ndr seek <path> <timestamp_ns>\n"; return 1; }
@@ -775,7 +794,7 @@ void App::help() const {
     std::cout<<"sync <source-id|domain:name|preset:name>\n";
     std::cout<<"cache <source-id>\n";
     std::cout<<"gaia inspect <csv-path> [epoch_year]\n";
-    std::cout<<"ndr inspect <path>\nndr seek <path> <timestamp_ns>\n";
+    std::cout<<"ndr inspect <path>\nndr seek <path> <timestamp_ns>\nndr replay <path> [from_ns] [to_ns]\n";
     std::cout<<"orbit list <source|group> [query] [limit]\n";
     std::cout<<"orbit live <source|group> [query] [limit]\n";
     std::cout<<"orbit inspect <source|group> <query> [lat lon alt_m frequency_hz]\n";

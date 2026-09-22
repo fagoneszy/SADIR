@@ -16,7 +16,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 20–21 LOD/quality | foundation | renderer LOD and inspector freshness labels; uncertainty visualization is open. |
 | 22–23 covariance/conjunction | foundation | covariance transforms, PSD rejection, deterministic screening, conservative spatial broadphase and numerically integrated encounter-plane Pc; richer encounter dynamics and operational CDM covariance profiles remain open. |
 | 24 CCSDS | foundation | OMM, OPM KVN, single-segment OEM KVN, CDM conjunction-summary KVN and range/Doppler TDM KVN; OCM and broader profiles remain open. |
-| 25–27 NDR/clock/replay | foundation | checksummed chronological NDR and deterministic clock; typed source, object, Cartesian-state and event blocks exist, while additional schemas and UI replay are open. |
+| 25–27 NDR/clock/replay | foundation | checksummed chronological NDR and deterministic clock; typed source, object, Cartesian-state and event blocks exist, with deterministic console seek/range replay, while additional schemas and graphical replay are open. |
 | 28–29 maps/stations | foundation | geodetic station catalog parser and TSV catalog/info console commands; Natural Earth data/rendering and a sourced public station catalog remain open. |
 | 30–32 GNSS/ILRS | foundation | bounded SP3 position, RINEX CLK satellite-clock, RINEX navigation-header and RINEX 3 epoch/declared-observable ingestion; SSR, broadcast-orbit propagation, CPF/CRD and validation fixtures remain open. |
 | 33 numerical propagation | foundation | central, J2, third-body, caller-parameterized exponential drag and cannonball SRP with RK4/adaptive RK4; validated atmosphere, attitude/ephemeris coupling and higher-order integration remain open. |
