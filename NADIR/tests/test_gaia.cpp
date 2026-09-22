@@ -1,6 +1,7 @@
 #include <nadir/astro/gaia.hpp>
 #include <nadir/tui/app.hpp>
 #include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -18,5 +19,8 @@ int main() {
  if(console.str().find("SOURCES 1")==std::string::npos) return 4;
  if(console.str().find("EPOCH 2026")==std::string::npos) return 5;
  if(nadir::astro::parse_gaia_csv("source_id,ra,dec,phot_g_mean_mag\n1,360,0,1\n").ok) return 6;
- return nadir::astro::parse_gaia_csv(std::string(64U*1024U*1024U+1U,'x')).ok?7:0;
+ if(nadir::astro::parse_gaia_csv(std::string(64U*1024U*1024U+1U,'x')).ok) return 7;
+ std::uint32_t random=0x9e3779b9U;
+ for(int sample=0;sample<512;++sample){const auto length=random%512U;random=random*1664525U+1013904223U;std::string fuzz;fuzz.reserve(length);for(std::uint32_t i=0;i<length;++i){random=random*1664525U+1013904223U;fuzz.push_back(static_cast<char>(random>>24U));}(void)nadir::astro::parse_gaia_csv(fuzz);}
+ return 0;
 }
