@@ -94,5 +94,7 @@ int main() {
     if (stl.vertices.size() != 4 || stl.edges.size() != 5) return 2;
     if (binary_stl.vertices.size() != 3 || binary_stl.edges.size() != 3) return 3;
     if (glb.vertices.size() != 3 || glb.edges.size() != 3) return 4;
-    return nadir::model::load_stl_ascii("missing.stl").vertices.empty() ? 0 : 5;
+    if (obj.content_sha256.size() != 64 || stl.content_sha256.size() != 64 ||
+        binary_stl.content_sha256.size() != 64 || glb.content_sha256.size() != 64) return 5;
+    return nadir::model::load_stl_ascii("missing.stl").vertices.empty() ? 0 : 6;
 }

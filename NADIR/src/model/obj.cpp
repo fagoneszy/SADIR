@@ -1,4 +1,5 @@
 #include <nadir/model/obj.hpp>
+#include <nadir/core/sha256.hpp>
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -14,6 +15,12 @@
 namespace nadir::model {
 
 namespace {
+
+Mesh with_provenance(Mesh mesh, const std::filesystem::path& path) {
+    mesh.source_path = path.generic_string();
+    mesh.content_sha256 = core::sha256_file(path.string());
+    return mesh;
+}
 
 std::uint32_t read_u32_le(const char* data) {
     return static_cast<std::uint32_t>(static_cast<unsigned char>(data[0])) |
@@ -64,7 +71,7 @@ Mesh load_stl_binary(const std::filesystem::path& path, std::uint32_t triangle_c
         }
         if (!add_triangle(mesh, vertex_indices, unique_edges, vertices)) return {};
     }
-    return mesh;
+    return with_provenance(std::move(mesh), path);
 }
 
 } // namespace
@@ -101,7 +108,7 @@ Mesh load_obj(const std::filesystem::path& path) {
             }
         }
     }
-    return mesh;
+    return with_provenance(std::move(mesh), path);
 }
 
 Mesh load_stl_ascii(const std::filesystem::path& path) {
@@ -154,7 +161,7 @@ Mesh load_stl_ascii(const std::filesystem::path& path) {
         }
     }
     if (in_loop || malformed) return {};
-    return mesh;
+    return with_provenance(std::move(mesh), path);
 }
 
 Mesh load_stl(const std::filesystem::path& path) {

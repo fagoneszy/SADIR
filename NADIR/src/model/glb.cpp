@@ -1,5 +1,6 @@
 #include <nadir/model/obj.hpp>
 #include <nadir/core/json.hpp>
+#include <nadir/core/sha256.hpp>
 
 #include <bit>
 #include <cmath>
@@ -146,6 +147,8 @@ Mesh load_glb(const std::filesystem::path& path) {
         const auto a = vertex(indices[i]); const auto b = vertex(indices[i + 1]); const auto c = vertex(indices[i + 2]);
         if (!a || !b || !c || !append_triangle(result, unique_vertices, unique_edges, {*a, *b, *c})) return {};
     }
+    result.source_path = path.generic_string();
+    result.content_sha256 = core::sha256_file(path.string());
     return result;
 }
 } // namespace nadir::model

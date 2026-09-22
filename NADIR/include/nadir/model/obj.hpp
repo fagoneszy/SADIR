@@ -13,6 +13,8 @@ struct Edge {
 struct Mesh {
     std::vector<Vec3> vertices;
     std::vector<Edge> edges;
+    std::string source_path;
+    std::string content_sha256;
 };
 
 Mesh load_obj(const std::filesystem::path& path);
