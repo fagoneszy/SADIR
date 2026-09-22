@@ -21,5 +21,14 @@ int main() {
     const std::array bodies{distant};
     const auto differential = orbit::gravity_acceleration({radius, 0.0, 0.0}, central, bodies);
     if (!std::isfinite(differential.x) || std::abs(differential.x - orbit::gravity_acceleration({radius, 0.0, 0.0}, central).x) < 1.0e-12) return 4;
-    return orbit::propagate_numerical(initial, 1.0, 0.0, central) ? 5 : 0;
+    const orbit::DragModel drag{.drag_coefficient=2.2, .area_m2=10.0, .mass_kg=500.0,
+                                 .reference_density_kg_m3=1.0e-9, .reference_altitude_m=200'000.0,
+                                 .scale_height_m=50'000.0};
+    const orbit::CartesianState low_orbit{{6'578'137.0, 0.0, 0.0}, {0.0, 7'800.0, 0.0}};
+    const auto drag_a = orbit::drag_acceleration(low_orbit, drag, central);
+    if (!(drag_a.y < 0.0) || !std::isfinite(drag_a.y)) return 5;
+    const auto with_drag = orbit::propagate_numerical(low_orbit, 60.0, 1.0, central, {}, drag);
+    const auto without_drag = orbit::propagate_numerical(low_orbit, 60.0, 1.0, central);
+    if (!with_drag || !without_drag || with_drag->velocity_m_s.norm() >= without_drag->velocity_m_s.norm()) return 6;
+    return orbit::propagate_numerical(initial, 1.0, 0.0, central) ? 7 : 0;
 }

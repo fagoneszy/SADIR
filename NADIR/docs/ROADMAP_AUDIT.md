@@ -19,7 +19,7 @@ whole roadmap item; **open** means no sufficient implementation exists.
 | 25–27 NDR/clock/replay | foundation | checksummed chronological NDR and deterministic clock; typed source provenance and Cartesian-state blocks exist, while additional schemas and UI replay are open. |
 | 28–29 maps/stations | foundation | geodetic station catalog parser and TSV catalog/info console commands; Natural Earth data/rendering and a sourced public station catalog remain open. |
 | 30–32 GNSS/ILRS | open | SP3/CLK/SSR, RINEX, CPF/CRD and validation fixtures absent. |
-| 33 numerical propagation | foundation | central, J2, third-body RK4; adaptive high-order, SRP and drag remain open. |
+| 33 numerical propagation | foundation | central, J2, third-body and caller-parameterized exponential drag with RK4/adaptive RK4; validated atmosphere, higher-order integration and SRP remain open. |
 | 34–37 EGM2008/atmosphere/weather/WMM | open | no validated model/data ingest. |
 | 38–41 DE/SPICE/solar system/small bodies | foundation | Horizons provider and body data; local DE/SPICE and validated display path open. |
 | 42 spacecraft geometry | foundation | OBJ plus tested ASCII and binary STL mesh loaders; GLB and provenance binding remain open. |
