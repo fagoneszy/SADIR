@@ -5,6 +5,7 @@
 #include <nadir/core/time.hpp>
 #include <nadir/earth/fireball.hpp>
 #include <nadir/earth/seismic.hpp>
+#include <nadir/earth/space_weather.hpp>
 #include <nadir/geo/eop.hpp>
 #include <nadir/geo/frames.hpp>
 #include <nadir/geo/wgs84.hpp>
@@ -67,6 +68,11 @@ int main() {
     if (!fbp || fbp->events.size()!=1) return 17;
     if (!fbp->events[0].latitude_deg || std::abs(*fbp->events[0].latitude_deg+12.0)>1e-12) return 18;
     if (!fbp->events[0].longitude_deg || std::abs(*fbp->events[0].longitude_deg+45.0)>1e-12) return 19;
+
+    const auto f107=nadir::earth::parse_noaa_f107(R"([{"time_tag":"2026-01-01T20:00:00","flux":123.4}])");
+    const auto dst=nadir::earth::parse_noaa_dst(R"([{"time_tag":"2026-01-01T00:00:00","dst":-42}])");
+    if (f107.size()!=1 || f107[0].flux_sfu!=123.4 || dst.size()!=1 || dst[0].dst_nt!=-42.0 ||
+        !nadir::earth::parse_noaa_f107("invalid").empty()) return 21;
 
     const double dop=nadir::geo::doppler_observed_hz(145800000.0,-1000.0);
     if (!(dop>145800000.0)) return 20;

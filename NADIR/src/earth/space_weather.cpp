@@ -2,7 +2,9 @@
 #include <nadir/core/json.hpp>
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <map>
+#include <limits>
 
 namespace nadir::earth {
 
@@ -62,6 +64,36 @@ std::vector<SolarWindSample> parse_noaa_solar_wind_plasma(const std::string& tex
         const auto* r=(*rows)[i].as_array();
         if (!r) continue;
         out.push_back({string(*r,t),number(*r,s),number(*r,d),number(*r,temp)});
+    }
+    return out;
+}
+
+std::vector<F107Sample> parse_noaa_f107(const std::string& text) {
+    const auto parsed = json::parse(text);
+    std::vector<F107Sample> out;
+    const auto* rows = parsed.ok ? parsed.value.as_array() : nullptr;
+    if (!rows) return out;
+    for (const auto& row : *rows) {
+        const auto* time = row.get("time_tag");
+        const auto* flux = row.get("flux");
+        if (!time || !flux || time->as_string().empty()) continue;
+        const auto value = flux->as_number(std::numeric_limits<double>::quiet_NaN());
+        if (std::isfinite(value)) out.push_back({time->as_string(), value});
+    }
+    return out;
+}
+
+std::vector<DstSample> parse_noaa_dst(const std::string& text) {
+    const auto parsed = json::parse(text);
+    std::vector<DstSample> out;
+    const auto* rows = parsed.ok ? parsed.value.as_array() : nullptr;
+    if (!rows) return out;
+    for (const auto& row : *rows) {
+        const auto* time = row.get("time_tag");
+        const auto* dst = row.get("dst");
+        if (!time || !dst || time->as_string().empty()) continue;
+        const auto value = dst->as_number(std::numeric_limits<double>::quiet_NaN());
+        if (std::isfinite(value)) out.push_back({time->as_string(), value});
     }
     return out;
 }

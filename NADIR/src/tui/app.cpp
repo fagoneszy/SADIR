@@ -680,13 +680,15 @@ int App::spaceweather(const std::vector<std::string>&) {
     const auto c=catalog();
     if (!c) return 1;
     data::SyncEngine engine(cache_root());
-    for (const auto& id:{std::string("noaa.swpc.kp"),std::string("noaa.swpc.solarwind.plasma"),std::string("noaa.swpc.solarwind.mag"),std::string("noaa.swpc.scales")}) {
+    for (const auto& id:{std::string("noaa.swpc.kp"),std::string("noaa.swpc.solarwind.plasma"),std::string("noaa.swpc.solarwind.mag"),std::string("noaa.swpc.f107"),std::string("noaa.swpc.dst"),std::string("noaa.swpc.scales")}) {
         const auto s=c->find(id);
         if (s && s->syncable) engine.fetch(*s);
     }
     data::CacheStore store(cache_root());
     const auto kp_path=store.latest("noaa.swpc.kp");
     const auto sw_path=store.latest("noaa.swpc.solarwind.plasma");
+    const auto f107_path=store.latest("noaa.swpc.f107");
+    const auto dst_path=store.latest("noaa.swpc.dst");
     if (kp_path) {
         const auto text=json::read_text_file(*kp_path);
         if (text) {
@@ -706,6 +708,14 @@ int App::spaceweather(const std::vector<std::string>&) {
                 std::cout<<"SW TIME      "<<v.timestamp<<"\nSW SPEED     "<<v.speed_km_s<<" km/s\nSW DENSITY   "<<v.density_p_cm3<<" p/cm3\nSW TEMP      "<<v.temperature_k<<" K\n";
             }
         }
+    }
+    if (f107_path) if (const auto text=json::read_text_file(*f107_path)) {
+        const auto samples=earth::parse_noaa_f107(*text);
+        if (!samples.empty()) { const auto& v=samples.back(); std::cout<<"F107 TIME    "<<v.timestamp<<"\nF107        "<<v.flux_sfu<<" sfu\n"; }
+    }
+    if (dst_path) if (const auto text=json::read_text_file(*dst_path)) {
+        const auto samples=earth::parse_noaa_dst(*text);
+        if (!samples.empty()) { const auto& v=samples.back(); std::cout<<"DST TIME     "<<v.timestamp<<"\nDST         "<<v.dst_nt<<" nT\n"; }
     }
     return 0;
 }
