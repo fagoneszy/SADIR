@@ -12,6 +12,12 @@ int main() {
         parallel.position_y_km != batch.position_y_km || parallel.position_z_km != batch.position_z_km ||
         parallel.velocity_x_km_s != batch.velocity_x_km_s || parallel.velocity_y_km_s != batch.velocity_y_km_s ||
         parallel.velocity_z_km_s != batch.velocity_z_km_s) return 2;
+    nadir::orbit::Sgp4BatchWorkerPool pool{3};
+    const auto pooled = pool.propagate(records, 0.0);
+    const auto pooled_again = pool.propagate(records, 15.0);
+    const auto expected_again = nadir::orbit::propagate_sgp4_batch(records, 15.0, 1);
+    if (pool.worker_count() != 3 || pooled.position_x_km != batch.position_x_km ||
+        pooled_again.position_x_km != expected_again.position_x_km || pooled_again.valid != expected_again.valid) return 3;
     return batch.position_x_km.size()==batch.size() && batch.velocity_z_km_s.size()==batch.size() &&
-        nadir::orbit::propagate_sgp4_batch({}, 0.0, 8).size()==0 ? 0 : 3;
+        nadir::orbit::propagate_sgp4_batch({}, 0.0, 8).size()==0 && pool.propagate({}, 0.0).size()==0 ? 0 : 4;
 }

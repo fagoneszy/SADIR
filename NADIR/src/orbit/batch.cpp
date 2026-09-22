@@ -45,4 +45,73 @@ PropagationBatch propagate_sgp4_batch(const std::vector<astro::OmmRecord>& recor
     for (auto& worker : workers) worker.join();
     return batch;
 }
+
+Sgp4BatchWorkerPool::Sgp4BatchWorkerPool(std::size_t worker_count) {
+    if (worker_count == 0) worker_count = std::thread::hardware_concurrency();
+    worker_count = std::max<std::size_t>(1, worker_count);
+    workers_.reserve(worker_count);
+    for (std::size_t index{}; index < worker_count; ++index)
+        workers_.emplace_back(&Sgp4BatchWorkerPool::worker, this, index);
+}
+
+Sgp4BatchWorkerPool::~Sgp4BatchWorkerPool() {
+    { std::lock_guard lock(mutex_); stopping_ = true; }
+    work_ready_.notify_all();
+    for (auto& thread : workers_) thread.join();
+}
+
+PropagationBatch Sgp4BatchWorkerPool::propagate(const std::vector<astro::OmmRecord>& records, double minutes) {
+    std::lock_guard invocation_lock(invocation_mutex_);
+    PropagationBatch batch;
+    const auto count = records.size();
+    batch.norad_ids.resize(count);
+    batch.position_x_km.resize(count); batch.position_y_km.resize(count); batch.position_z_km.resize(count);
+    batch.velocity_x_km_s.resize(count); batch.velocity_y_km_s.resize(count); batch.velocity_z_km_s.resize(count);
+    batch.valid.resize(count);
+    if (count == 0) return batch;
+    std::unique_lock lock(mutex_);
+    records_ = &records;
+    batch_ = &batch;
+    minutes_ = minutes;
+    completed_ = 0;
+    ++generation_;
+    work_ready_.notify_all();
+    work_done_.wait(lock, [&] { return completed_ == workers_.size(); });
+    records_ = nullptr;
+    batch_ = nullptr;
+    return batch;
+}
+
+void Sgp4BatchWorkerPool::worker(std::size_t worker_index) {
+    std::size_t observed_generation{};
+    for (;;) {
+        const std::vector<astro::OmmRecord>* records{};
+        PropagationBatch* batch{};
+        double minutes{};
+        {
+            std::unique_lock lock(mutex_);
+            work_ready_.wait(lock, [&] { return stopping_ || generation_ != observed_generation; });
+            if (stopping_) return;
+            observed_generation = generation_;
+            records = records_;
+            batch = batch_;
+            minutes = minutes_;
+        }
+        const auto chunk = (records->size() + workers_.size() - 1) / workers_.size();
+        const auto first = worker_index * chunk;
+        const auto last = std::min(records->size(), first + chunk);
+        for (std::size_t index = first; index < last; ++index) {
+            const auto state = propagate_sgp4((*records)[index], minutes);
+            batch->norad_ids[index] = (*records)[index].norad_cat_id;
+            batch->valid[index] = static_cast<unsigned char>(static_cast<bool>(state));
+            batch->position_x_km[index] = state.state.position_km.x;
+            batch->position_y_km[index] = state.state.position_km.y;
+            batch->position_z_km[index] = state.state.position_km.z;
+            batch->velocity_x_km_s[index] = state.state.velocity_km_s.x;
+            batch->velocity_y_km_s[index] = state.state.velocity_km_s.y;
+            batch->velocity_z_km_s[index] = state.state.velocity_km_s.z;
+        }
+        { std::lock_guard lock(mutex_); if (++completed_ == workers_.size()) work_done_.notify_one(); }
+    }
+}
 } // namespace nadir::orbit
