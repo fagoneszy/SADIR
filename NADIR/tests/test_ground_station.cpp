@@ -18,6 +18,8 @@ int main() {
     if (!stations || stations->size() != 1) return 1;
     const auto* station = nadir::geo::find_ground_station(*stations, "BR-TEST");
     if (!station || station->elevation_mask_deg != 10.0 || station->location.altitude_m != 850.0) return 2;
+    const auto coops=nadir::geo::parse_noaa_coops_stations_json(R"({"stations":[{"id":"8720218","name":"Mayport","lat":30.398,"lng":-81.427}]})");
+    if(!coops||coops->size()!=1||coops->front().source!="NOAA CO-OPS")return 4;
     std::ostringstream console;
     auto* const previous_console = std::cout.rdbuf(console.rdbuf());
     const int catalog_status = nadir::tui::App{}.run({"station", "catalog", path.string()});

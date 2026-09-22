@@ -1,8 +1,10 @@
 #include <nadir/geo/station.hpp>
+#include <nadir/core/json.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <limits>
 #include <sstream>
 
 namespace nadir::geo {
@@ -52,6 +54,11 @@ std::optional<std::vector<GroundStation>> load_ground_stations_tsv(const std::st
 const GroundStation* find_ground_station(const std::vector<GroundStation>& stations, const std::string& id) noexcept {
     const auto found = std::find_if(stations.begin(), stations.end(), [&](const auto& station) { return station.id == id; });
     return found == stations.end() ? nullptr : &*found;
+}
+
+std::optional<std::vector<GroundStation>> parse_noaa_coops_stations_json(const std::string& text) {
+    const auto parsed=json::parse(text); const auto* list=parsed.ok?parsed.value.get("stations"):nullptr; if(!list||!list->as_array())return{};std::vector<GroundStation> out;
+    for(const auto& value:*list->as_array()){const auto id=value.get("id"),name=value.get("name"),lat=value.get("lat"),lon=value.get("lng");if(!id||!name||!lat||!lon)continue;GroundStation station{id->as_string(),name->as_string(),{lat->as_number(std::numeric_limits<double>::quiet_NaN()),lon->as_number(std::numeric_limits<double>::quiet_NaN()),0.0},0.0,"NOAA CO-OPS"};if(station.valid()&&!find_ground_station(out,station.id))out.push_back(std::move(station));}return out;
 }
 
 } // namespace nadir::geo
