@@ -67,6 +67,14 @@ struct NdrObjectBlock {
     bool operator==(const NdrObjectBlock&) const = default;
 };
 
+// Time-stamped operational annotation associated with an object in the stream.
+struct NdrEventBlock {
+    std::uint64_t object_id{};
+    std::string event_type;
+    std::string detail;
+    bool operator==(const NdrEventBlock&) const = default;
+};
+
 struct NdrFile {
     NdrHeader header;
     std::vector<NdrRecord> records;
@@ -91,6 +99,8 @@ std::vector<std::uint8_t> encode_object_block(const NdrObjectBlock& object);
 std::optional<NdrObjectBlock> decode_object_block(std::span<const std::uint8_t> bytes);
 std::vector<std::uint8_t> encode_state_block(const NdrStateBlock& state);
 std::optional<NdrStateBlock> decode_state_block(std::span<const std::uint8_t> bytes);
+std::vector<std::uint8_t> encode_event_block(const NdrEventBlock& event);
+std::optional<NdrEventBlock> decode_event_block(std::span<const std::uint8_t> bytes);
 bool write_ndr(const std::filesystem::path& path, NdrHeader header,
                std::span<const NdrRecord> records);
 std::optional<NdrFile> read_ndr(const std::filesystem::path& path);

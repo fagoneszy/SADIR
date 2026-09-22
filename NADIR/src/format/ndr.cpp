@@ -13,6 +13,7 @@ constexpr std::size_t header_size = 8 + 2 + 2 + 8 + 8 + 4 + 4;
 constexpr std::uint32_t max_payload_bytes = 64U * 1024U * 1024U;
 constexpr std::size_t sha256_bytes = 32;
 constexpr std::size_t max_source_id_bytes = 255;
+constexpr std::size_t max_event_detail_bytes = 4096;
 
 template <class T>
 void append_le(std::vector<std::uint8_t>& out, T value) {
@@ -157,6 +158,27 @@ std::optional<NdrStateBlock> decode_state_block(std::span<const std::uint8_t> by
     if (!take_le(bytes,offset,result.object_id) || result.object_id==0 ||
         !take_double(bytes,offset,result.state.position_m.x) || !take_double(bytes,offset,result.state.position_m.y) || !take_double(bytes,offset,result.state.position_m.z) ||
         !take_double(bytes,offset,result.state.velocity_m_s.x) || !take_double(bytes,offset,result.state.velocity_m_s.y) || !take_double(bytes,offset,result.state.velocity_m_s.z)) return std::nullopt;
+    return result;
+}
+
+std::vector<std::uint8_t> encode_event_block(const NdrEventBlock& event) {
+    if (event.object_id == 0 || event.event_type.empty() || event.event_type.size() > max_source_id_bytes ||
+        event.detail.size() > max_event_detail_bytes) return {};
+    for (const auto character : event.event_type + event.detail) if (static_cast<unsigned char>(character) < 0x20U) return {};
+    std::vector<std::uint8_t> bytes;
+    bytes.reserve(sizeof(event.object_id) + 2 + event.event_type.size() + 2 + event.detail.size());
+    append_le(bytes, event.object_id); append_le(bytes, static_cast<std::uint16_t>(event.event_type.size()));
+    bytes.insert(bytes.end(), event.event_type.begin(), event.event_type.end()); append_le(bytes, static_cast<std::uint16_t>(event.detail.size()));
+    bytes.insert(bytes.end(), event.detail.begin(), event.detail.end()); return bytes;
+}
+
+std::optional<NdrEventBlock> decode_event_block(std::span<const std::uint8_t> bytes) {
+    NdrEventBlock result; std::size_t offset{}; std::uint16_t type_size{}, detail_size{};
+    if (!take_le(bytes, offset, result.object_id) || !take_le(bytes, offset, type_size) || result.object_id == 0 || type_size == 0 || type_size > max_source_id_bytes || bytes.size() - offset < type_size) return std::nullopt;
+    result.event_type.assign(reinterpret_cast<const char*>(bytes.data() + offset), type_size); offset += type_size;
+    if (!take_le(bytes, offset, detail_size) || detail_size > max_event_detail_bytes || bytes.size() - offset != detail_size) return std::nullopt;
+    result.detail.assign(reinterpret_cast<const char*>(bytes.data() + offset), detail_size);
+    for (const auto character : result.event_type + result.detail) if (static_cast<unsigned char>(character) < 0x20U) return std::nullopt;
     return result;
 }
 

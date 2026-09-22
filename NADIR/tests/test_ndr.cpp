@@ -19,6 +19,9 @@ int main() {
     const nadir::format::NdrObjectBlock object{42, 25544, "ISS (ZARYA)"};
     const auto decoded_object = nadir::format::decode_object_block(nadir::format::encode_object_block(object));
     if (!decoded_object || *decoded_object != object) return 10;
+    const nadir::format::NdrEventBlock event{42, "MANEUVER", "planned delta-v"};
+    const auto decoded_event = nadir::format::decode_event_block(nadir::format::encode_event_block(event));
+    if (!decoded_event || *decoded_event != event) return 12;
     auto malformed_source = source;
     malformed_source.sha256[0] = 'G';
     const std::array<std::uint8_t, 2> empty_source{0, 0};
@@ -28,6 +31,7 @@ int main() {
     const std::vector<nadir::format::NdrRecord> records{
         {static_cast<std::uint16_t>(nadir::format::NdrRecordType::Source), 100, nadir::format::encode_source_block(source)},
         {static_cast<std::uint16_t>(nadir::format::NdrRecordType::Object), 150, nadir::format::encode_object_block(object)},
+        {static_cast<std::uint16_t>(nadir::format::NdrRecordType::Event), 175, nadir::format::encode_event_block(event)},
         {static_cast<std::uint16_t>(nadir::format::NdrRecordType::State), 200, nadir::format::encode_state_block(state)},
     };
     if (!nadir::format::write_ndr(path, {.type = 7, .timestamp_ns = 42}, records)) return 1;
@@ -38,7 +42,7 @@ int main() {
     const int inspect_status = nadir::tui::App{}.run({"ndr", "inspect", path.string()});
     const int seek_status = nadir::tui::App{}.run({"ndr", "seek", path.string(), "150"});
     std::cout.rdbuf(previous_console);
-    if (inspect_status != 0 || seek_status != 0 || console.str().find("RECORDS 3") == std::string::npos ||
+    if (inspect_status != 0 || seek_status != 0 || console.str().find("RECORDS 4") == std::string::npos ||
         console.str().find("NAME ISS (ZARYA)") == std::string::npos) return 11;
     const nadir::format::NdrReplay replay(*read);
     if (replay.seek(99) || !replay.seek(100) || replay.seek(150)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::Object) ||
