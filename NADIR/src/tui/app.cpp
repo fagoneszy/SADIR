@@ -404,6 +404,8 @@ int App::ndr(const std::vector<std::string>& args) {
                       << "\nZ " << state->state.position_m.z << "\n";
         break;
     case format::NdrRecordType::Event:
+        if (const auto event = format::decode_event_block(record->payload))
+            std::cout << "OBJECT " << event->object_id << "\nEVENT " << event->event_type << "\nDETAIL " << event->detail << "\n";
         break;
     }
     return 0;

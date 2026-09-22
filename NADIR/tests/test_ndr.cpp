@@ -41,9 +41,10 @@ int main() {
     auto* const previous_console = std::cout.rdbuf(console.rdbuf());
     const int inspect_status = nadir::tui::App{}.run({"ndr", "inspect", path.string()});
     const int seek_status = nadir::tui::App{}.run({"ndr", "seek", path.string(), "150"});
+    const int event_seek_status = nadir::tui::App{}.run({"ndr", "seek", path.string(), "175"});
     std::cout.rdbuf(previous_console);
-    if (inspect_status != 0 || seek_status != 0 || console.str().find("RECORDS 4") == std::string::npos ||
-        console.str().find("NAME ISS (ZARYA)") == std::string::npos) return 11;
+    if (inspect_status != 0 || seek_status != 0 || event_seek_status != 0 || console.str().find("RECORDS 4") == std::string::npos ||
+        console.str().find("NAME ISS (ZARYA)") == std::string::npos || console.str().find("EVENT MANEUVER") == std::string::npos) return 11;
     const nadir::format::NdrReplay replay(*read);
     if (replay.seek(99) || !replay.seek(100) || replay.seek(150)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::Object) ||
         replay.seek(999)->type != static_cast<std::uint16_t>(nadir::format::NdrRecordType::State)) return 3;
